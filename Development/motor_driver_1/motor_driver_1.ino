@@ -28,12 +28,29 @@ void loop() {
   //Run the motors
 
   driveMotorA(100);
+  driveMotorB(-100);
+  delay(1000);
+  driveMotorA(100);
   driveMotorB(100);
+  delay(1500);
+  driveMotorA(100);
+  driveMotorB(-100);
   delay(1000);
   driveMotorA(-100);
   driveMotorB(-100);
-  delay(1000);
+  delay(1500);
+
+//  driveMotorA(100);
+//  driveMotorB(100);
+//  delay(1000);
+//
+//  driveMotorA(100);
+//  driveMotorB(-100);
+//  delay(1000);
   
+//  driveMotorA(-100);
+//  driveMotorB(-100);
+//  delay(1000);
 }
 
 
@@ -58,7 +75,7 @@ void driveMotorB(int s){
         Serial.print("Motor B: ");
         Serial.println(s);
         
-        if(s >= 0){
+        if(s <= 0){
           //Drive the motor forward (CW)
           digitalWrite(BI1_PIN, HIGH);
           digitalWrite(BI2_PIN, LOW);
