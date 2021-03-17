@@ -1,0 +1,4 @@
+#Based on the SparkFun i2c Tutorial
+#https://learn.sparkfun.com/tutorials/raspberry-pi-spi-and-i2c-tutorial?_ga=2.55747947.1781922679.1519247259-1651301836.1474044382#i2c-on-pi
+
+import smbus

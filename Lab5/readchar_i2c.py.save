@@ -1,0 +1,56 @@
+import readchar
+import smbus
+import time
+import os
+
+bus = smbus.SMBus(1)
+
+i2c_arduino = 0x36
+i2c_cmd = 0x01
+
+def ConvertStringToBytes(src):
+    converted = []
+    for b in src:
+        converted.append(ord(b))
+    return converted
+
+
+while(1):
+    key = readchar.readkey();
+    print(key);
+
+    # Determine what to do based on the key input
+
+    # Numbered Keys
+
+    if(key == "2"):
+        # Down Key
+        print("Backward");
+	def ConvertStringToBytes(src):
+    converted = []
+    for b in src:
+        converted.append(ord(b))
+    return converted
+    elif(key == "4"):
+        # Left Key
+        print("Turning Left");
+        
+    elif(key == "5"):
+        # Stop Turning
+        print("Stop Turning & Advancing");
+
+    elif(key == "6"):
+	# Turn Right
+
+    elif(key == "8"):
+        # Faster Key
+        print("Forward Faster");
+
+    # Non-Numbering Keys
+    elif(key == "e"):
+        # Enable Key
+        print("Endabled");
+
+    elif(key == "q" or key == "c" or key == "x" or key == "z"):
+        print("Execution Terminated by '"+key+"'");
+        exit();
