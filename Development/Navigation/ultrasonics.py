@@ -69,3 +69,13 @@ class UltrasonicSensors:
         distance = (TimeElapsed * 34300) / 2
 
         return distance
+       
+      def centering()
+        center = 0
+        for i in range(3)
+             r_dist = UltrasonicSensors.Left_dis()
+             l_dist = UltrasonicSensors.Right_dis()
+             center = center + r_dist - l_dist
+         center = center/3 
+         
+         return center
