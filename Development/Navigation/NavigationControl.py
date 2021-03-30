@@ -8,22 +8,25 @@ sys.path.append("../modules/")
 import I2C_LIB
 
 std_spd = 100
+drive_delay = 2
+turn_delay = 1
+F = 1
+L = 1
+R = -1
+B = -1
 
 try:
     while True:
         #Beginning of navigation loop will always be to go forward
-        driverobot("F"
+        driveRobot(F, std_spd, drive_delay)
         center = centering()
-        
             if center < 1 # if center is less than one then left distance was larger on average
-                # twist left and continue forward
-                i2c_control.Send_Command("AF100")
-                i2c_control.Send_Command("BR100")
-                time.sleep(0.5)
-                i2c_control.Send_Command("AF100")
-                i2c_control.Send_Command("BF100")
-            if center > 1 # if center is > 1 right distance was larger
-                # twist right and continue forward
+                #turn left
+                turnRobot(L, std_spd, turn_delay)
+            else if center > 1 # if center is > 1 right distance was larger
+                #turn right
+                turnRobot(R, std_spd, turn_delay)
+        if 
     # Reset by pressing CTRL + C
 except KeyboardInterrupt:
     print("Measurement stopped by User")
