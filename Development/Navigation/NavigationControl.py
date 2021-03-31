@@ -26,26 +26,26 @@ try:
             driveRobot(F, std_spd/2)
             rightLast = True
             leftLast = False
-        else if left_on == True:
+        elif left_on == True:
             turnRobot(R, std_spd, turn_delay)
             driveRobot(F, std_spd/2)
             leftLast = True
             rightLast = False
-        else if center_on == True:
+        elif center_on == True:
             stopRobot()
             driveRobot(B, std_spd)
             time.sleep(1)
             if leftLast == True:
                 turnRobot(R, std_spd, turn_delay)
                 driveRobot(F, std_spd/2)
-            else if rightLast == True:
+            elif rightLast == True:
                 turnRobot(L, std_spd, turn_delay)
                 driveRobot(F, std_spd/2)
-        else if center < 1: # if center is less than one then left distance was larger on average
+        elif center < 1: # if center is less than one then left distance was larger on average
             #turn left
             turnRobot(L, std_spd, turn_delay)
             driveRobot(F, std_spd)
-        else if center > 1: # if center is > 1 right distance was larger
+        elif center > 1: # if center is > 1 right distance was larger
             #turn right
             turnRobot(R, std_spd, turn_delay)
             driveRobot(F, std_spd)
