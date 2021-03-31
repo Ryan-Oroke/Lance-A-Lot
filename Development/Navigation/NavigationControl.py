@@ -49,8 +49,6 @@ try:
             #turn right
             turnRobot(R, std_spd, turn_delay)
             driveRobot(F, std_spd)
-                
-            turnRobot
     # Reset by pressing CTRL + C
 except KeyboardInterrupt:
     print("Measurement stopped by User")
