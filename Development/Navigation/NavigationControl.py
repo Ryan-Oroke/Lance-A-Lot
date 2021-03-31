@@ -2,10 +2,9 @@ import smbus
 import sys
 import time
 import os
-from ultrasonics import UltrasonicSensors
-from i2c_commands import i2c_control
-sys.path.append("../modules/")
 import I2C_LIB
+import sensors 
+import sensors
 
 std_spd = 100
 drive_delay = 2
