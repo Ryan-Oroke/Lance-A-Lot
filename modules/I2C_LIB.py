@@ -15,15 +15,6 @@ bus = smbus.SMBus(1)
 i2c_address = 0x36
 i2c_cmd = 0x01
 
-# IR pin assignments
-IR_LEFT_PIN = 22
-IR_CENTER_PIN = 27
-IR_RIGHT_PIN = 17
-#setup the button pins
-GPIO.setup(IR_LEFT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(IR_CENTER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(IR_RIGHT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
 def convertStringToBytes(src):
     converted = []
     for b in src:
@@ -75,11 +66,4 @@ def driveRobot(dir, speed, delay):
     driveMotor("B", dir*speed)
     time.sleep(delay)
     stopRobot()
-        
-def IR_read()
-    #Check for lines
-    left_on = GPIO.input(IR_LEFT_PIN)
-    center_on = GPIO.input(IR_CENTER_PIN)
-    right_on = GPIO.input(IR_RIGHT_PIN)
-    return left_on, center_on, right_on
     
