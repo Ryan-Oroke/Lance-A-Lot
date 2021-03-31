@@ -61,9 +61,7 @@ def turnRobot(dir, speed, delay):
     time.sleep(delay)
     stopRobot()
     
-def driveRobot(dir, speed, delay):
+def driveRobot(dir, speed):
     driveMotor("A", dir*speed)
     driveMotor("B", dir*speed)
-    time.sleep(delay)
-    stopRobot()
     
