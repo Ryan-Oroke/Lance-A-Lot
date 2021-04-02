@@ -27,73 +27,72 @@ GPIO.setup(IR_RIGHT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 
-class UltrasonicSensors: 
-    def Right_dis():
-        # set Trigger to HIGH
-        GPIO.output(trig, True)
+def Right_dis():
+    # set Trigger to HIGH
+    GPIO.output(trig, True)
 
-        # set Trigger after 0.01ms to LOW
-        time.sleep(0.00001)
-        GPIO.output(trig, False)
+    # set Trigger after 0.01ms to LOW
+    time.sleep(0.00001)
+    GPIO.output(trig, False)
 
+    StartTime = time.time()
+    StopTime = time.time()
+
+    # save StartTime
+    while GPIO.input(echo1) == 0:
         StartTime = time.time()
+
+    # save time of arrival
+    while GPIO.input(echo1) == 1:
         StopTime = time.time()
 
-        # save StartTime
-        while GPIO.input(echo1) == 0:
-            StartTime = time.time()
+    # time difference between start and arrival
+    TimeElapsed = StopTime - StartTime
+    # multiply with the sonic speed (34300 cm/s)
+    # and divide by 2, because there and back
+    distance = (TimeElapsed * 34300) / 2
 
-        # save time of arrival
-        while GPIO.input(echo1) == 1:
-            StopTime = time.time()
+    return distance
 
-        # time difference between start and arrival
-        TimeElapsed = StopTime - StartTime
-        # multiply with the sonic speed (34300 cm/s)
-        # and divide by 2, because there and back
-        distance = (TimeElapsed * 34300) / 2
+def Left_dis():
+    # set Trigger to HIGH
+    GPIO.output(trig, True)
 
-        return distance
+    # set Trigger after 0.01ms to LOW
+    time.sleep(0.00001)
+    GPIO.output(trig, False)
 
-    def Left_dis():
-        # set Trigger to HIGH
-        GPIO.output(trig, True)
+    StartTime = time.time()
+    StopTime = time.time()
 
-        # set Trigger after 0.01ms to LOW
-        time.sleep(0.00001)
-        GPIO.output(trig, False)
-
+    # save StartTime
+    while GPIO.input(echo2) == 0:
         StartTime = time.time()
+
+    # save time of arrival
+    while GPIO.input(echo2) == 1:
         StopTime = time.time()
 
-        # save StartTime
-        while GPIO.input(echo2) == 0:
-            StartTime = time.time()
+    # time difference between start and arrival
+    TimeElapsed = StopTime - StartTime
+    # multiply with the sonic speed (34300 cm/s)
+    # and divide by 2, because there and back
+    distance = (TimeElapsed * 34300) / 2
 
-        # save time of arrival
-        while GPIO.input(echo2) == 1:
-            StopTime = time.time()
+    return distance
 
-        # time difference between start and arrival
-        TimeElapsed = StopTime - StartTime
-        # multiply with the sonic speed (34300 cm/s)
-        # and divide by 2, because there and back
-        distance = (TimeElapsed * 34300) / 2
+def centering():
+    center = 0
+    for i in range(3):
+         r_dist = Left_dis()
+         l_dist = Right_dis()
+         center = center + r_dist - l_dist
+    center = center/3
 
-        return distance
-       
-      def centering()
-        center = 0
-        for i in range(3)
-             r_dist = UltrasonicSensors.Left_dis()
-             l_dist = UltrasonicSensors.Right_dis()
-             center = center + r_dist - l_dist
-         center = center/3 
-         
-         return center
+    return center
 
 
-def IR_read()
+def IR_read():
     #Check for lines
     left_on = GPIO.input(IR_LEFT_PIN)
     center_on = GPIO.input(IR_CENTER_PIN)

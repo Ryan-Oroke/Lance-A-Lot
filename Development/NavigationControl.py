@@ -2,9 +2,8 @@ import smbus
 import sys
 import time
 import os
-import I2C_LIB
-import sensors 
-import sensors
+import I2C_LIB as i2c
+import Sensors 
 
 std_spd = 100
 drive_delay = 2
@@ -17,7 +16,7 @@ B = -1
 try:
     while True:
         #Beginning of navigation loop will always be to go forward
-        driveRobot(F, std_spd)
+        i2c.driveRobot(F, std_spd)
         center = centering()  
         left_on, center_on, right_on = IR_read()
         if right_on == True:
