@@ -25,7 +25,8 @@ GPIO.setup(IR_LEFT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(IR_CENTER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(IR_RIGHT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-
+#Ultrasonics
+timeout = 0.15
 
 def Right_dis():
     # set Trigger to HIGH
@@ -39,7 +40,7 @@ def Right_dis():
     StopTime = time.time()
 
     # save StartTime
-    while GPIO.input(echo1) == 0:
+    while GPIO.input(echo1) == 0 and time.time()-StopTime < timeout:
         StartTime = time.time()
 
     # save time of arrival
@@ -64,14 +65,14 @@ def Left_dis():
 
     StartTime = time.time()
     StopTime = time.time()
-
     # save StartTime
-    while GPIO.input(echo2) == 0:
+    while GPIO.input(echo2) == 0 and time.time()-StopTime < timeout:
         StartTime = time.time()
 
     # save time of arrival
+    #print(GPIO.input(echo2), time.time()-StartTime < timeout)
     while GPIO.input(echo2) == 1:
-        StopTime = time.time()
+    	StopTime = time.time()
 
     # time difference between start and arrival
     TimeElapsed = StopTime - StartTime
@@ -98,3 +99,9 @@ def IR_read():
     center_on = GPIO.input(IR_CENTER_PIN)
     right_on = GPIO.input(IR_RIGHT_PIN)
     return left_on, center_on, right_on
+
+def all_IR_False():
+    x = IR_read()
+    if(x[0] and x[1] and x[2]):
+	return True
+    return False

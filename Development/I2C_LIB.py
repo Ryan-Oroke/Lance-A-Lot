@@ -15,6 +15,8 @@ bus = smbus.SMBus(1)
 i2c_address = 0x36
 i2c_cmd = 0x01
 
+delay90 = 1.08
+
 def convertStringToBytes(src):
     converted = []
     for b in src:
@@ -60,6 +62,15 @@ def turnRobot(dir, speed, delay):
     driveMotor("B", -1*dir*speed)
     time.sleep(delay)
     stopRobot()
+
+def turn90(i):
+    if(i == 1):
+        turnRobot(1, 80, delay90)
+    elif(i == -1):
+        turnRobot(-1, 80, delay90)
+    else:
+        print("turn90 input error!")
+	exit(0)
     
 def driveRobot(dir, speed):
     driveMotor("A", dir*speed)
