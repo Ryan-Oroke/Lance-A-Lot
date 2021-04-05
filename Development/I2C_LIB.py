@@ -48,7 +48,7 @@ def driveMotor(letter, speed):
         print("ERROR: Bad Motor Command (" + letter + ")");
     else:
         if(speed != 0):
-            print(letter + direction + str(speed))
+            #print(letter + direction + str(speed))
             sendMessage(letter + direction + str(format(abs(speed), "3.0f")))
         else:
             sendMessage(letter + direction + "000")

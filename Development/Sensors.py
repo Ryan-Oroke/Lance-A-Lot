@@ -103,5 +103,13 @@ def IR_read():
 def all_IR_False():
     x = IR_read()
     if(x[0] and x[1] and x[2]):
-	return True
+	print("all_IR_False() is True")
+        return True
+    print("all_IR_False() is False")
+    return False
+
+def center_IR_False():
+    x = IR_read()
+    if(x[1]):
+        return  True
     return False
