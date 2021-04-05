@@ -37,7 +37,7 @@ G.add_weighted_edges_from(edges6to1)
 #nx.draw(G, with_labels=True, font_weight='bold')
 #plt.show()
 
-path = nx.shortest_path(G, source=1, target=6)
+path = nx.shortest_path(G, source=6, target=1)
 path_edges = []
 path_edges_orientation = []
 print(path)
@@ -51,7 +51,7 @@ print(path)
 print(path_edges)
 print(path_edges_orientation)
 
-current_orientation = 1
+current_orientation = 3
 
 #Now let's drive it!
 for i in range(len(path_edges)-1):

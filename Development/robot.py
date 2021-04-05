@@ -21,8 +21,14 @@ def traverseEdge():
 
     print("Initial loop without US.")
     while(sense.Left_dis() > sight_threshold or sense.Right_dis() > sight_threshold):
-        i2c.driveRobot(1, 50)
-        #print("Ultrasonics cannot see.")
+	ir = sense.IR_read()
+	if(ir[0] == False):
+		i2c.turnRobot(-1, 80, 0.25)
+	elif(ir[2] == False):
+		i2c.turnRobot(1, 80, 0.25)
+	else:
+            i2c.driveRobot(1, 50)
+            #print("Ultrasonics cannot see.")
         time.sleep(0.01)
 
     print("Entering PID Loop:")
