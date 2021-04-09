@@ -1,6 +1,7 @@
 #Libraries
 import RPi.GPIO as GPIO
 import time
+import camera
  
 #GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
@@ -113,3 +114,11 @@ def center_IR_False():
     if(x[1]):
         return  True
     return False
+
+def center_line_detected():
+	x = IR_read()
+
+	if(x[1] == False):
+		return camera.get_line_status()
+	else:
+		return "NONE"

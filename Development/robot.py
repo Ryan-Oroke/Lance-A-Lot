@@ -29,7 +29,15 @@ def traverseEdge():
 	else:
             i2c.driveRobot(1, 50)
             #print("Ultrasonics cannot see.")
+	i2c.driveRobot(1, 30)
+	status_line = sense.center_line_detected()
+	print(status_line)
+	if(status_line != "NONE"):
+		print("Line Seen: ", status_line)
+		break
+	i2c.driveRobot(1, 50)
         time.sleep(0.01)
+
 
     print("Entering PID Loop:")
     while(sense.center_IR_False() and sense.Left_dis() < sight_threshold and sense.Right_dis() < sight_threshold):
@@ -53,7 +61,7 @@ def traverseEdge():
         #i2c.driveRobot(1, 50)
         #time.sleep(0.25)
 
-    while(sense.center_IR_False()):
+    while(sense.center_line_detected() == "NONE"):
 	ir = sense.IR_read()
 	if(ir[0] == False):
 		i2c.turnRobot(-1, 80, 0.25)
@@ -65,7 +73,7 @@ def traverseEdge():
 
     print("Reached tape!")
     i2c.driveRobot(-70, 1 )
-    time.sleep(0.01)
+    time.sleep(10.01)
 
 def changeOrientation(current, new):
 
