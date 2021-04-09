@@ -25,14 +25,17 @@ def convertStringToBytes(src):
 
 def sendMessage(msg):
     bytesToSend = convertStringToBytes(msg); 
-    bus.write_i2c_block_data(i2c_address, i2c_cmd, bytesToSend);
+    try:
+    	bus.write_i2c_block_data(i2c_address, i2c_cmd, bytesToSend);
+    except:
+	print("IO ERROR CAUGHT")
     
 def driveMotor(letter, speed):
     if(speed >= 0):
         direction = "F"
     elif(speed < 0):
         direction = "R"
-        
+
     if(abs(speed) > 255):
         if(speed > 0):
             speed = 255
@@ -65,9 +68,9 @@ def turnRobot(dir, speed, delay):
 
 def turn90(i):
     if(i == 1):
-        turnRobot(1, 80, delay90)
+        turnRobot(1, 70, delay90)
     elif(i == -1):
-        turnRobot(-1, 80, delay90)
+        turnRobot(-1, 70, delay90)
     else:
         print("turn90 input error!")
 	exit(0)

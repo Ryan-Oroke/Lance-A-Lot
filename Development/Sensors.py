@@ -2,6 +2,7 @@
 import RPi.GPIO as GPIO
 import time
 import camera
+import I2C_LIB as i2c
  
 #GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
@@ -116,9 +117,12 @@ def center_IR_False():
     return False
 
 def center_line_detected():
+	
+	
 	x = IR_read()
 
 	if(x[1] == False):
+		i2c.driveRobot(1, 28)
 		return camera.get_line_status()
 	else:
 		return "NONE"

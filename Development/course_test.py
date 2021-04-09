@@ -23,24 +23,23 @@ W = 4
 
 G = nx.DiGraph()
 
-nodes = [1, 2, 3, 4, 5, 6]
+nodes = [1, 2, 3]
 G.add_nodes_from(nodes)
 
-edges1to6 = [(1,2,N), (2,3,E), (3,4,N), (4,5,W), (5,6,N)]
-edges6to1 = [(6,5,S),(5,4,E),(4,3,S),(3,2,W),(2,1,S)]
+edges = [(1,2,N), (2,3,E), (3,2,W), (2,1,S)]
 
-G.add_weighted_edges_from(edges1to6)
-G.add_weighted_edges_from(edges6to1)
+G.add_weighted_edges_from(edges)
+
 
 #Can't do this on the Pi
 #plt.plot()
 #nx.draw(G, with_labels=True, font_weight='bold')
 #plt.show()
 
-path = nx.shortest_path(G, source=1, target=6)
+path = nx.shortest_path(G, source=1, target=3)
 path_edges = []
 path_edges_orientation = []
-print(path)
+print(path_edges)
 
 #Get edges for traversal
 for i in range(len(path)-1):
@@ -55,5 +54,34 @@ current_orientation = 1
 
 #Now let's drive it!
 for i in range(len(path_edges)-1):
-    robot.traverseEdge2()
+    robot.traverseEdge()
     current_orientation = robot.changeOrientation(current_orientation, path_edges_orientation[i+1])
+
+robot.traverseEdge()
+
+
+#SECOND TIME
+path = nx.shortest_path(G, source=3, target=1)
+path_edges = []
+path_edges_orientation = []
+print(path)
+
+#Get edges for traversal
+for i in range(len(path)-1):
+    path_edges.append((path[i], path[i+1]))
+    path_edges_orientation.append(G[path[i]][path[i+1]]['weight'])
+
+print(path)
+print(path_edges)
+print(path_edges_orientation)
+
+current_orientation = robot.changeOrientation(current_orientation, 4)
+
+#Now let's drive it!
+for i in range(len(path_edges)-1):
+    robot.traverseEdge()
+    current_orientation = robot.changeOrientation(current_orientation, path_edges_orientation[i+1])
+
+robot.traverseEdge()
+
+
