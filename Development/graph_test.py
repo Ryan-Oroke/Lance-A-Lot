@@ -55,5 +55,5 @@ current_orientation = 1
 
 #Now let's drive it!
 for i in range(len(path_edges)-1):
-    robot.traverseEdge2()
+    robot.traverseEdge()
     current_orientation = robot.changeOrientation(current_orientation, path_edges_orientation[i+1])

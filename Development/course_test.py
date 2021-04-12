@@ -26,7 +26,7 @@ G = nx.DiGraph()
 nodes = [1, 2, 3]
 G.add_nodes_from(nodes)
 
-edges = [(1,2,N), (2,3,E), (3,2,W), (2,1,S)]
+edges = [(1,2,N), (2,3,E), (3,4,E), (4,5,N)]
 
 G.add_weighted_edges_from(edges)
 
@@ -36,7 +36,7 @@ G.add_weighted_edges_from(edges)
 #nx.draw(G, with_labels=True, font_weight='bold')
 #plt.show()
 
-path = nx.shortest_path(G, source=1, target=3)
+path = nx.shortest_path(G, source=1, target=5)
 path_edges = []
 path_edges_orientation = []
 print(path_edges)
@@ -54,34 +54,15 @@ current_orientation = 1
 
 #Now let's drive it!
 for i in range(len(path_edges)-1):
-    robot.traverseEdge()
+    robot.traverseEdge2()
     current_orientation = robot.changeOrientation(current_orientation, path_edges_orientation[i+1])
+    i2c.sendMessage("SV000")
+    time.sleep(1)
+    i2c.sendMessage("SV140")
 
-robot.traverseEdge()
+robot.traverseEdge2()
 
 
-#SECOND TIME
-path = nx.shortest_path(G, source=3, target=1)
-path_edges = []
-path_edges_orientation = []
-print(path)
 
-#Get edges for traversal
-for i in range(len(path)-1):
-    path_edges.append((path[i], path[i+1]))
-    path_edges_orientation.append(G[path[i]][path[i+1]]['weight'])
-
-print(path)
-print(path_edges)
-print(path_edges_orientation)
-
-current_orientation = robot.changeOrientation(current_orientation, 4)
-
-#Now let's drive it!
-for i in range(len(path_edges)-1):
-    robot.traverseEdge()
-    current_orientation = robot.changeOrientation(current_orientation, path_edges_orientation[i+1])
-
-robot.traverseEdge()
 
 

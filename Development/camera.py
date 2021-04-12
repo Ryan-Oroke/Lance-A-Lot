@@ -6,7 +6,7 @@ import time
 
 # Set the GPIO
 triggered = False
-yellow_threshold = 18000
+yellow_threshold = 100000
 purple_threshold = 4000
 
 def get_line_status():

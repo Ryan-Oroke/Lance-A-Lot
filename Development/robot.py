@@ -3,21 +3,74 @@ import I2C_LIB as i2c
 import Sensors as sense
 from simple_pid import PID
 
-sight_threshold = 50
+sight_threshold = 100
 
-pid = PID(4,0, 0, setpoint=9) #One sided
+pid = PID(4, 0, 0, setpoint=8) #One sided
 #pid = PID(8, 0, 0, setpoint = 0) #Two-Sided
 
 pid.output_limits = (-50, 50)
 
-min_drive_speed = 50
-max_ultrasonic_reading = 30
+pid_max_time_step = 0.125
+
+min_drive_speed = 80
+max_ultrasonic_reading = 50
 
 control = 0
 
-def traverseEdge():
+def traverseEdge2():
     print("Driving Forward...")
     scalar = 1
+
+    line_status = sense.center_line_detected()
+    last_pid_time = time.time()
+    while( line_status == "NONE"):
+	
+        ir = sense.IR_read()
+        if(ir[0] == False):
+            i2c.turnRobot(-1, 80, 0.25)
+        elif(ir[2] == False):
+            i2c.turnRobot(1, 80, 0.25)
+
+        left_us = sense.Left_dis()
+        right_us = sense.Right_dis()
+	print(left_us, right_us)
+        if(left_us < sight_threshold and right_us < sight_threshold):
+		t = time.time()
+		if((t - last_pid_time) > pid_max_time_step):
+            		mean_us = (left_us + right_us)/2;
+            		control = pid(mean_us)
+            		i2c.driveMotor("A", min_drive_speed + scalar*control)
+	    		i2c.driveMotor("B", min_drive_speed - scalar*control)
+	    		print("Using US:", left_us, right_us, control)
+	    		last_pid_time = time.time()
+		else:
+			print("PID out of time")
+	    	time.sleep(0.05)
+        elif(left_us < sight_threshold and right_us >= sight_threshold):
+		i2c.turnRobot(1, 70, 0.1)
+	elif(left_us >= sight_threshold and right_us < sight_threshold):
+		i2c.turnRobot(-1, 70, 0.1)
+	else:
+            i2c.driveRobot(1, 80)
+            time.sleep(0.05)
+
+        line_status = sense.center_line_detected()
+
+
+    if(line_status == "PURPLE"):
+        i2c.driveRobot(1, 50)
+        time.sleep(1)
+	i2c.stopRobot()
+    else:
+	i2c.driveRobot(-1, 50)
+	time.sleep(1)
+	i2c.stopRobot()
+    print("Line Visible: ", line_status)
+
+
+def traverseEdge():
+    print("Driving Forward...")
+    scalar = -1
 
     print("Initial loop without US.")
     while(sense.Left_dis() > sight_threshold or sense.Right_dis() > sight_threshold):
@@ -89,37 +142,3 @@ def changeOrientation(current, new):
     
     return new
 
-def traverseEdge2():
-    print("Driving Forward...")
-    scalar = -1
-
-    line_status = sense.center_line_detected()
-    while( line_status == "NONE"):
-	i2c.driveRobot(1, 50)
-        ir = sense.IR_read()
-        if(ir[0] == False):
-            i2c.turnRobot(-1, 80, 0.25)
-        elif(ir[2] == False):
-            i2c.turnRobot(1, 80, 0.25)
-
-        left_us = sense.Left_dis()
-        right_us = sense.Right_dis()
-        if(left_us < sight_threshold and right_us < sight_threshold):
-	    print("Using US:", left_us, right_us)
-            mean_us = (left_us + right_us)/2;
-            control = pid(mean_us)
-            i2c.driveMotor("A", min_drive_speed + scalar*control)
-	    i2c.driveMotor("B", min_drive_speed - scalar*control)
-	    time.sleep(0.01)
-        else:
-            i2c.driveRobot(1, 50)
-            time.sleep(0.01)
-
-        line_status = sense.center_line_detected()
-
-
-    if(line_status == "PURPLE"):
-        i2c.driveRobot(1, 50)
-        time.sleep(1)
-	i2c.stopRobot()
-    print("Line Visible: ", line_status)
