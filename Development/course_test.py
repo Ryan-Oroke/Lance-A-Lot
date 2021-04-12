@@ -26,7 +26,7 @@ G = nx.DiGraph()
 nodes = [1, 2, 3]
 G.add_nodes_from(nodes)
 
-edges = [(1,2,N), (2,3,E), (3,4,E), (4,5,N)]
+edges = [(1,2,N), (2,3,E), (3,4,W), (4,5,S)]
 
 G.add_weighted_edges_from(edges)
 
@@ -56,9 +56,9 @@ current_orientation = 1
 for i in range(len(path_edges)-1):
     robot.traverseEdge2()
     current_orientation = robot.changeOrientation(current_orientation, path_edges_orientation[i+1])
-    i2c.sendMessage("SV000")
-    time.sleep(1)
-    i2c.sendMessage("SV140")
+    #i2c.sendMessage("SV000")
+    #time.sleep(1)
+    #i2c.sendMessage("SV140")
 
 robot.traverseEdge2()
 

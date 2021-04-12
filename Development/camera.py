@@ -14,13 +14,20 @@ def get_line_status():
     _, frame = cap.read()
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
+    #White -- FOr home testing ONLY
+    yellow_threshold = 7000
+    yellow_lower_bound = np.array([0, 20, 80])
+    yellow_upper_bound = np.array([255, 255, 255])
+    purple_lower_bound = np.array([150, 255, 255])
+    purple_upper_bound = np.array([151, 255, 255])
+
     #Yellow
-    yellow_lower_bound = np.array([15, 40, 40])
-    yellow_upper_bound = np.array([40, 215, 215])
+    #yellow_lower_bound = np.array([15, 40, 40])
+    #yellow_upper_bound = np.array([40, 215, 215])
 
     #Purple
-    purple_lower_bound = np.array([150, 50, 50])
-    purple_upper_bound = np.array([180, 255, 255])
+    #purple_lower_bound = np.array([150, 50, 50])
+    #purple_upper_bound = np.array([180, 255, 255])
  
     #Red Balloon
     #lower_bound = np.array([160, 50, 50])

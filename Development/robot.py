@@ -3,23 +3,25 @@ import I2C_LIB as i2c
 import Sensors as sense
 from simple_pid import PID
 
-sight_threshold = 100
+std_speed = 55
 
-pid = PID(4, 0, 0, setpoint=8) #One sided
+sight_threshold = 45
+
+pid = PID(1, 0, 0, setpoint=13) #One sided
 #pid = PID(8, 0, 0, setpoint = 0) #Two-Sided
 
 pid.output_limits = (-50, 50)
 
 pid_max_time_step = 0.125
 
-min_drive_speed = 80
+min_drive_speed = std_speed
 max_ultrasonic_reading = 50
 
 control = 0
 
 def traverseEdge2():
     print("Driving Forward...")
-    scalar = 1
+    scalar = -1
 
     line_status = sense.center_line_detected()
     last_pid_time = time.time()
@@ -33,7 +35,7 @@ def traverseEdge2():
 
         left_us = sense.Left_dis()
         right_us = sense.Right_dis()
-	print(left_us, right_us)
+	#print(left_us, right_us)
         if(left_us < sight_threshold and right_us < sight_threshold):
 		t = time.time()
 		if((t - last_pid_time) > pid_max_time_step):
@@ -41,28 +43,38 @@ def traverseEdge2():
             		control = pid(mean_us)
             		i2c.driveMotor("A", min_drive_speed + scalar*control)
 	    		i2c.driveMotor("B", min_drive_speed - scalar*control)
-	    		print("Using US:", left_us, right_us, control)
+	    		print("Using US(L/B,R/F):", left_us, right_us, control)
 	    		last_pid_time = time.time()
+			time.sleep(0.05)
 		else:
-			print("PID out of time")
-	    	time.sleep(0.05)
+			#print("PID out of time")
+			pass
+	    	#time.sleep(0.05)
         elif(left_us < sight_threshold and right_us >= sight_threshold):
-		i2c.turnRobot(1, 70, 0.1)
+		#i2c.turnRobot(1, 70, 0.1)
+		print("Adjusting course to left.")
+		i2c.driveMotor("A", std_speed)
+		i2c.driveMotor("B", 0.7*std_speed)
+		time.sleep(0.05)
 	elif(left_us >= sight_threshold and right_us < sight_threshold):
-		i2c.turnRobot(-1, 70, 0.1)
+		#i2c.turnRobot(-1, 70, 0.1)
+		print("Adujsuting course to right.")
+		i2c.driveMotor("A", 0.7*std_speed)
+		i2c.driveMotor("B", std_speed)
+		time.sleep(0.5)
 	else:
-            i2c.driveRobot(1, 80)
+            i2c.driveRobot(1, std_speed)
             time.sleep(0.05)
 
         line_status = sense.center_line_detected()
 
 
     if(line_status == "PURPLE"):
-        i2c.driveRobot(1, 50)
+        i2c.driveRobot(1, std_speed)
         time.sleep(1)
 	i2c.stopRobot()
     else:
-	i2c.driveRobot(-1, 50)
+	i2c.driveRobot(-1, std_speed)
 	time.sleep(1)
 	i2c.stopRobot()
     print("Line Visible: ", line_status)
