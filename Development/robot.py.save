@@ -19,16 +19,9 @@ max_ultrasonic_reading = 50
 
 control = 0
 
-intersection_delay = 2.05
-line_crossing_delay = 0.625
-backup_delay= 0.5
-driving_timeout = 15
-
-def traverseEdge3(start_node, end_node):
-	print("Travelling from Node #" + str(start_node))
+def traverseEdge3():
 	#IR Only!
-	starting_drive_time = time.time()
-	while(sense.center_line_detected() == "NONE" and time.time() - starting_drive_time < driving_timeout):
+	while(sense.center_line_detected() == "NONE"):
 		i2c.driveRobot(1, std_speed)
 		ir = sense.IR_read()
 		if(ir[0] == False):
@@ -41,16 +34,14 @@ def traverseEdge3(start_node, end_node):
 
 	center_status = sense.center_line_detected()
 	print(center_status)
-	if(center_status == "YELLOW" or time.time()-starting_drive_time >= driving_timeout ):
-		i2c.driveRobot(-1, 70)
-		time.sleep(backup_delay)
-		i2c.stopRobot()
+	if(center_status == "YELLOW"):
+	#	i2c.driveRobot(-1, 70)
+	#	time.sleep(1)
+	#	i2c.stopRobot()
 	#elif(center_status == "PURPLE"):
 	#	i2c.driveRobot(1, 70)
 	#	time.sleep(1)
 	#	i2c.stopRobot()
-
-	print("Reached Node #" + str(end_node))
 
 
 def intersectionTurn(n, oldBearing, newBearing):
@@ -69,19 +60,12 @@ def intersectionTurn(n, oldBearing, newBearing):
             i2c.turn90(1)
 
     while(sense.center_line_detected() == "NONE"):
-	ir = sense.IR_read()
-	if(ir[0] == False):
-		i2c.turnRobot(-1, 80, 0.25)
-	elif(ir[2] == False):
-		i2c.turnRobot(1, 80, 0.25)
         i2c.driveRobot(1, std_speed)
         time.sleep(0.01)
 
     i2c.driveRobot(1, std_speed)
     time.sleep(line_crossing_delay)
     i2c.stopRobot()
-
-    return newBearing
 
 
 def crossIntersection(old_dir, new_dir):
@@ -168,31 +152,18 @@ def traverseEdge():
     i2c.driveRobot(-70, 1 )
     time.sleep(10.01)
 
-def changeOrientation(n, current, new):
+def changeOrientation(current, new):
 
     diff = new - current
     for i in range(abs(diff)):
         #turnRobot90()
         if(diff > 0):
-            print("Turning 90 deg cw at #" + str(n) + " ("+str(current)+"->"+str(new)+")")
+            print("Turning 90 deg cw ("+str(current)+"->"+str(new)+")")
             i2c.turn90(-1)
         elif(diff < 0):
-            print("Turning 90 deg ccw at #" + str(n) + " ("+str(current)+"->"+str(new)+")")
+            print("Turning 90 deg ccw ("+str(current)+"->"+str(new)+")")
             i2c.turn90(1)
     
-    l = sense.Left_dis()
-    r = sense.Right_dis()
-    x = l-r
-
-    while(abs(x) > 5 and l < 15 and r < 15 and False):
-	print("Fixing bearing...")
-	if(x > 0):
-	    i2c.turnRobot(1, std_speed, 0.5)
-	else:
-	    i2c.turnRobot(-1, std_speed, 0.5)
-	
-	
-
     return new
 
 def traverseEdge2():

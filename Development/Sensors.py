@@ -122,7 +122,7 @@ def center_line_detected():
 	x = IR_read()
 
 	if(x[1] == False):
-		i2c.driveRobot(1, 30)
+		i2c.driveRobot(1, 20)
 		return camera.get_line_status()
 	else:
 		return "NONE"

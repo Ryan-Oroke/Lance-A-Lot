@@ -15,7 +15,8 @@ bus = smbus.SMBus(1)
 i2c_address = 0x36
 i2c_cmd = 0x01
 
-delay90 = 1.08
+adj_A = 1.1
+delay90 = 1.04
 
 def convertStringToBytes(src):
     converted = []
@@ -25,10 +26,13 @@ def convertStringToBytes(src):
 
 def sendMessage(msg):
     bytesToSend = convertStringToBytes(msg); 
-    try:
-    	bus.write_i2c_block_data(i2c_address, i2c_cmd, bytesToSend);
-    except:
-	print("IO ERROR CAUGHT")
+    not_sent = True
+    while(not_sent):
+    	try:
+    		bus.write_i2c_block_data(i2c_address, i2c_cmd, bytesToSend);
+		not_sent = False
+    	except:
+		print("IO ERROR CAUGHT")
     
 def driveMotor(letter, speed):
     if(speed >= 0):
@@ -44,7 +48,8 @@ def driveMotor(letter, speed):
     elif(abs(speed) < 0):
         speed = 0
     
-    #if(letter == "A"):
+    if(letter == "A"):
+	speed = speed * adj_A
         ##print("Correct!")
     
     if(letter != "A" and letter != "B"):
@@ -61,7 +66,7 @@ def stopRobot():
     driveMotor("B", 0)
             
 def turnRobot(dir, speed, delay):
-    driveMotor("A", dir*speed*1.25)
+    driveMotor("A", dir*speed)
     driveMotor("B", -1*dir*speed)
     time.sleep(delay)
     stopRobot()

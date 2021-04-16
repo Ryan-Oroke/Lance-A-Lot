@@ -6,8 +6,8 @@ import time
 
 # Set the GPIO
 triggered = False
-yellow_threshold = 100000
-purple_threshold = 4000
+yellow_threshold = 3000
+purple_threshold = 3000
 
 def get_line_status():
     cap = cv2.VideoCapture(0)
@@ -15,19 +15,19 @@ def get_line_status():
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     #White -- FOr home testing ONLY
-    yellow_threshold = 7000
-    yellow_lower_bound = np.array([0, 20, 80])
-    yellow_upper_bound = np.array([255, 255, 255])
-    purple_lower_bound = np.array([150, 255, 255])
-    purple_upper_bound = np.array([151, 255, 255])
+    #yellow_threshold = 7000
+    #yellow_lower_bound = np.array([0, 20, 80])
+    #yellow_upper_bound = np.array([255, 255, 255])
+    #purple_lower_bound = np.array([150, 255, 255])
+    #purple_upper_bound = np.array([151, 255, 255])
 
     #Yellow
-    #yellow_lower_bound = np.array([15, 40, 40])
-    #yellow_upper_bound = np.array([40, 215, 215])
+    yellow_lower_bound = np.array([25, 80, 80])
+    yellow_upper_bound = np.array([50, 215, 215])
 
     #Purple
-    #purple_lower_bound = np.array([150, 50, 50])
-    #purple_upper_bound = np.array([180, 255, 255])
+    purple_lower_bound = np.array([150, 50, 50])
+    purple_upper_bound = np.array([180, 255, 255])
  
     #Red Balloon
     #lower_bound = np.array([160, 50, 50])
