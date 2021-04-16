@@ -14,18 +14,20 @@ gpio.output(trigger_pin, gpio.HIGH)
 threshold = 4000
 
 cap = cv2.VideoCapture(0)
+cap.set(3, 64)
+cap.set(4, 64)
 
 while True:
     _, frame = cap.read()
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     #Yellow
-    #lower_bound = np.array([15, 40, 40])
-    #upper_bound = np.array([40, 215, 215])
+    lower_bound = np.array([15, 40, 40])
+    upper_bound = np.array([60, 215, 215])
 
     #Purple
-    lower_bound = np.array([150, 0, 0])
-    upper_bound = np.array([255, 255, 255])
+    #lower_bound = np.array([110, 0, 0])
+    #upper_bound = np.array([255, 255, 255])
     #Red Balloon
     #lower_bound = np.array([160, 50, 50])
     #upper_bound = np.array([180, 255, 255])

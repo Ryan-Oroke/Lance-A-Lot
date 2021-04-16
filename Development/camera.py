@@ -6,11 +6,13 @@ import time
 
 # Set the GPIO
 triggered = False
-yellow_threshold = 3000
-purple_threshold = 3000
+yellow_threshold = 2000
+purple_threshold = 2000
 
 def get_line_status():
     cap = cv2.VideoCapture(0)
+    cap.set(3, 64)
+    cap.set(4, 64)
     _, frame = cap.read()
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -22,12 +24,12 @@ def get_line_status():
     #purple_upper_bound = np.array([151, 255, 255])
 
     #Yellow
-    yellow_lower_bound = np.array([25, 80, 80])
-    yellow_upper_bound = np.array([50, 215, 215])
+    yellow_lower_bound = np.array([15, 40, 40])
+    yellow_upper_bound = np.array([60, 255, 255])
 
     #Purple
-    purple_lower_bound = np.array([150, 50, 50])
-    purple_upper_bound = np.array([180, 255, 255])
+    purple_lower_bound = np.array([110, 10, 10])
+    purple_upper_bound = np.array([255, 255, 255])
  
     #Red Balloon
     #lower_bound = np.array([160, 50, 50])
@@ -51,6 +53,8 @@ def get_line_status():
     # print(masked_pixels)
     # cv2.destroyAllWindows()
     #cap.release()
+
+    print(yellow_masked_pixels, purple_masked_pixels)
 
     if(yellow_masked_pixels > yellow_threshold and purple_masked_pixels > purple_threshold):
         return "BOTH"

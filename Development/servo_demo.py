@@ -3,5 +3,5 @@ import time
 
 i2c.sendMessage("SV000")
 time.sleep(1)
-i2c.sendMessage("SV140")
+i2c.sendMessage("SV180")
 

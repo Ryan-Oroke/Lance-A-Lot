@@ -16,7 +16,7 @@ i2c_address = 0x36
 i2c_cmd = 0x01
 
 adj_A = 1.1
-delay90 = 1.04
+delay90 = 1.5
 
 def convertStringToBytes(src):
     converted = []

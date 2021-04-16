@@ -3,7 +3,7 @@ import I2C_LIB as i2c
 import Sensors as sense
 from simple_pid import PID
 
-std_speed = 55
+std_speed = 65
 
 sight_threshold = 45
 
@@ -23,6 +23,7 @@ intersection_delay = 2.05
 line_crossing_delay = 0.625
 backup_delay= 0.5
 driving_timeout = 15
+turn90_time = 1.0
 
 def traverseEdge3(start_node, end_node):
 	print("Travelling from Node #" + str(start_node))

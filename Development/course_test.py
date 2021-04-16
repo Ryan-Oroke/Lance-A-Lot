@@ -16,7 +16,10 @@ def signal_handler(sig, frame_sig):
 signal.signal(signal.SIGINT, signal_handler)
 start_dir = 1
 def main():
-	dir = traverseGraph(start_dir, 1, 81)
+	dir = traverseGraph(start_dir, 1, 41)
+	i2c.sendMessage("SV000")
+	dir = traverseGraph(dir, 41, 81)
+	i2c.sendMessage("SV170")
 	dir = traverseGraph(dir, 81, 82)
 	dir = traverseGraph(dir, 82, 1)
 
