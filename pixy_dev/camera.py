@@ -1,4 +1,5 @@
-# still is
+# HOSTS OPENCV MODULE AND HANDLES LINE DETECTION COMPUTATIONS (CALLED FROM SENSORS.PY)
+# Honestly this is very straightforward if ever worked with cv2 and camera, so uncommented.
 
 import cv2
 import numpy as np

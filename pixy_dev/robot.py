@@ -33,22 +33,18 @@ blank_intersection_adj_delay = 0.5
 turn_bumper_delay = 1.2
 turn90_time = 1.0
 
-def adjustFromBumper(bumper_num):
-	print("Bumper " + str(bumper_num) + "hit, checking status...")
-	if(bumper_num == 0):
-		dir = -1
-	elif(bumper_num == 2):
-		dir = 1
-	#The Adjustment process
-	i2c.turnRobot(dir, std_speed, turn_bumper_delay)
-	if(sense.center_line_detected() == "YELLOW"):
-		i2c.turnRobot(-1*dir, std_speed, turn_bumper_delay + 0.25)
-	elif(sense.center_line_detected() != "PURPLE"):
-		i2c.turnRobot(-1*dir, std_speed, 0.25)
+)
 
 def traverseEdge3(start_node, end_node):
+	#PRIMARY EDGE TRAVERSAL ALGORITHM (IGNORE 1 AND 2)
+	#Drive forward (watching bumpers) until a line is hit, depending on the color of the line and target node the function will establish
+	# slightly different end conditions for the traversal. 
+
 	print("Travelling from Node #" + str(start_node))
-	#IR Only!
+
+	#This function uses IR only (no ultrasonics)!
+
+	#Drive until timeout or line reached. 
 	starting_drive_time = time.time()
 	while(sense.center_line_detected() == "NONE" and time.time() - starting_drive_time < driving_timeout):
 		i2c.driveRobot(1, std_speed)
@@ -63,8 +59,11 @@ def traverseEdge3(start_node, end_node):
 			i2c.driveRobot(1, std_speed)
             		#print("Ultrasonics cannot see.")
 
+	#Determine why the robot reached a line
 	center_status = sense.center_line_detected()
 	print(center_status)
+
+	#Depending on the node status establish different end conditions. 
 	if(center_status == "YELLOW" or time.time()-starting_drive_time >= driving_timeout ):
 		i2c.driveRobot(-1, 70)
 		if(end_node == 41 or end_node == 42):
@@ -80,12 +79,19 @@ def traverseEdge3(start_node, end_node):
 	print("Reached Node #" + str(end_node))
 
 def traverseToBlankNode(currNode, newNode, newBearing):
+    #Used for traversal to the hidden intersections (12, 13)
+
+    #d and opp_d are simple used to make adjusting the correct turning direction easier.
     d = 1
     opp_d = d*-1
+
+    #Make sure robot is heading for the correct node.  
     if(currNode == 11 and newNode == 12):
         i2c.driveRobot(1, std_speed)
         time.sleep(blank_intersection_search_delay)
         i2c.stopRobot
+
+	#Drive over to see if robot has reached a purple line. If not, adjust accordingly a couple times before giving up.
         for i in range(5):
             i2c.turn90(d)
             while(sense.center_line_detected() == "NONE"):
@@ -101,21 +107,14 @@ def traverseToBlankNode(currNode, newNode, newBearing):
                 
 
 def intersectionTurn(n, oldBearing, newBearing):
-    start_time = time.time()
-#    while(time.time() - start_time < intersection_delay):
-#	ir = sense.IR_read()
-#	if(False and ir[0] == False):
-#	    i2c.turnRobot(1, 80, 0.25)
-#	    start_time += 0.25
-#	elif(False and ir[2] == False):
-#	    i2c.turnRobot(-1, 80, 0.25)
-#	    start_time += 0.25
-#    	else:
-#	    i2c.driveRobot(1, std_speed*0.8)
+    #PRIMARY FUNCTION FOR INTERSECTION (VISIBLE) TRAVERSAL
+
+    #Drive into the middle of the intersection
     i2c.driveRobot(1, std_speed)
     time.sleep(intersection_delay)
     i2c.stopRobot()
- 
+
+    #Adjust our bearing (in 90 degree segments) 
     diff = newBearing - oldBearing
     for i in range(abs(diff)):
         #turnRobot90()
@@ -126,6 +125,7 @@ def intersectionTurn(n, oldBearing, newBearing):
             print("Turning 90 deg ccw at intersection #" + str(n) + " ("+str(oldBearing)+"->"+str(newBearing)+")")
             i2c.turn90(1)
 
+    #Robot must back up before continuing to ensure it sees the next purple line. 
     i2c.driveRobot(-1, std_speed)
     time.sleep(0.4)
 
@@ -141,14 +141,67 @@ def intersectionTurn(n, oldBearing, newBearing):
         i2c.driveRobot(1, std_speed)
         time.sleep(0.01)
 
+    #Delay used to ensure robot doesn't pick up line a second time
     i2c.driveRobot(1, std_speed)
     time.sleep(line_crossing_delay)
     i2c.stopRobot()
 
+    #Return new bearing to make it easier to track
     return newBearing
 
+def adjustFromBumper(bumper_num):
+	#Function call that exmaines line which has just bumped, and then makes decisions based on its color (yellow/purple)
+	print("Bumper " + str(bumper_num) + "hit, checking status...")
+	if(bumper_num == 0):
+		dir = -1
+	elif(bumper_num == 2):
+		dir = 1
+	#The Adjustment process
+	i2c.turnRobot(dir, std_speed, turn_bumper_delay)
+	if(sense.center_line_detected() == "YELLOW"):
+		i2c.turnRobot(-1*dir, std_speed, turn_bumper_delay + 0.25)
+	elif(sense.center_line_detected() != "PURPLE"):
+		i2c.turnRobot(-1*dir, std_speed, 0.25
+
+def changeOrientation(n, current, new):
+    #PRIMARY PACKAGE USED FOR TURNING IN YELLOW CORNERS
+
+    #Adjust direction in 90 degree steps
+    diff = new - current
+    for i in range(abs(diff)):
+        #turnRobot90()
+        if(diff > 0):
+            print("Turning 90 deg cw at #" + str(n) + " ("+str(current)+"->"+str(new)+")")
+            i2c.turn90(-1)
+        elif(diff < 0):
+            print("Turning 90 deg ccw at #" + str(n) + " ("+str(current)+"->"+str(new)+")")
+            i2c.turn90(1)
+
+    #Attempt to fix bearing with US (NOT USED)
+    l = sense.Left_dis()
+    r = sense.Right_dis()
+    x = l-r
+
+    while(abs(x) > 5 and l < 15 and r < 15 and False):
+	print("Fixing bearing...")
+	if(x > 0):
+	    i2c.turnRobot(1, std_speed, 0.5)
+	else:
+	    i2c.turnRobot(-1, std_speed, 0.5)
+
+
+
+
+
+
+
+
+
+
+#ALL OLD OR UNUSED STUFF
 
 def crossIntersection(old_dir, new_dir):
+	#NOT USED
 	print("crossIntersection()")
 	if(old_dir == new_dir):
 		start_time = time.time()
@@ -174,6 +227,9 @@ def crossIntersection(old_dir, new_dir):
 		i2c.driveRobot(1, 60)
 
 def traverseEdge():
+
+    #OLD/UNUSED
+
     print("Driving Forward...")
     scalar = -1
 
@@ -235,28 +291,7 @@ def traverseEdge():
     i2c.driveRobot(-70, 1 )
     time.sleep(10.01)
 
-def changeOrientation(n, current, new):
-
-    diff = new - current
-    for i in range(abs(diff)):
-        #turnRobot90()
-        if(diff > 0):
-            print("Turning 90 deg cw at #" + str(n) + " ("+str(current)+"->"+str(new)+")")
-            i2c.turn90(-1)
-        elif(diff < 0):
-            print("Turning 90 deg ccw at #" + str(n) + " ("+str(current)+"->"+str(new)+")")
-            i2c.turn90(1)
-    
-    l = sense.Left_dis()
-    r = sense.Right_dis()
-    x = l-r
-
-    while(abs(x) > 5 and l < 15 and r < 15 and False):
-	print("Fixing bearing...")
-	if(x > 0):
-	    i2c.turnRobot(1, std_speed, 0.5)
-	else:
-	    i2c.turnRobot(-1, std_speed, 0.5)
+)
 	
 	
 

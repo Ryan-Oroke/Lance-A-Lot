@@ -79,8 +79,13 @@ def turn90(i):
     else:
         print("turn90 input error!")
 	exit(0)
-    
+
 def driveRobot(dir, speed):
     driveMotor("A", dir*speed)
     driveMotor("B", dir*speed)
-    
+
+def raiseLance():
+    i2c.sendMessage("SV020")
+
+def lowerLance():
+    i2c.sendMessage("SV170")
