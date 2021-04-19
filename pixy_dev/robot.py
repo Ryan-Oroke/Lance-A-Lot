@@ -4,7 +4,7 @@ import Sensors as sense
 #from simple_pid import PID
 
 #std_speed = 65
-std_speed = 65
+std_speed = 67
 
 sight_threshold = 45
 
@@ -20,9 +20,10 @@ max_ultrasonic_reading = 50
 
 control = 0
 
-intersection_delay = 3.05
+intersection_delay = 2.45
 line_crossing_delay = 0.625
-backup_delay= 0.5
+backup_delay= 0.64
+short_backup_delay = 0.2
 #driving_timeout = 12
 driving_timeout = 9
 
@@ -64,10 +65,13 @@ def traverseEdge3(start_node, end_node):
 
 	center_status = sense.center_line_detected()
 	print(center_status)
-	#if(center_status == "YELLOW" or time.time()-starting_drive_time >= driving_timeout ):
-	#	i2c.driveRobot(-1, 70)
-	#	time.sleep(backup_delay)
-	#	i2c.stopRobot()
+	if(center_status == "YELLOW" or time.time()-starting_drive_time >= driving_timeout ):
+		i2c.driveRobot(-1, 70)
+		if(end_node == 41 or end_node == 42):
+			time.sleep(short_backup_delay)
+		else:
+			time.sleep(backup_delay)
+		i2c.stopRobot()
 	#elif(center_status == "PURPLE"):
 	#	i2c.driveRobot(1, 70)
 	#	time.sleep(1)

@@ -6,7 +6,7 @@ import time
 
 # Set the GPIO
 triggered = False
-yellow_threshold = 1500
+yellow_threshold = 500
 purple_threshold = 1200
 
 def get_line_status():
@@ -24,7 +24,7 @@ def get_line_status():
     #purple_upper_bound = np.array([151, 255, 255])
 
     #Yellow
-    yellow_lower_bound = np.array([15, 40, 40])
+    yellow_lower_bound = np.array([15, 80, 80])
     yellow_upper_bound = np.array([60, 255, 255])
 
     #Purple

@@ -1,113 +1,50 @@
 import time
 import I2C_LIB as i2c
 import Sensors as sense
-#from simple_pid import PID
+from simple_pid import PID
 
-#std_speed = 65
-std_speed = 65
+std_speed = 55
 
 sight_threshold = 45
 
-#pid = PID(16, 0, 0, setpoint=13) #One sided
+pid = PID(16, 0, 0, setpoint=13) #One sided
 #pid = PID(8, 0, 0, setpoint = 0) #Two-Sided
 
-#pid.output_limits = (-50, 50)
+pid.output_limits = (-50, 50)
 
-#pid_max_time_step = 0.125
+pid_max_time_step = 0.125
 
 min_drive_speed = std_speed
 max_ultrasonic_reading = 50
 
 control = 0
 
-intersection_delay = 3.05
-line_crossing_delay = 0.625
-backup_delay= 0.5
-#driving_timeout = 12
-driving_timeout = 9
-
-blank_intersection_search_delay = 3
-blank_intersection_adj_delay = 0.5
-
-turn_bumper_delay = 1.2
-turn90_time = 1.0
-
-def adjustFromBumper(bumper_num):
-	print("Bumper " + str(bumper_num) + "hit, checking status...")
-	if(bumper_num == 0):
-		dir = -1
-	elif(bumper_num == 2):
-		dir = 1
-	#The Adjustment process
-	i2c.turnRobot(dir, std_speed, turn_bumper_delay)
-	if(sense.center_line_detected() == "YELLOW"):
-		i2c.turnRobot(-1*dir, std_speed, turn_bumper_delay + 0.25)
-	elif(sense.center_line_detected() != "PURPLE"):
-		i2c.turnRobot(-1*dir, std_speed, 0.25)
-
-def traverseEdge3(start_node, end_node):
-	print("Travelling from Node #" + str(start_node))
+def traverseEdge3():
 	#IR Only!
-	starting_drive_time = time.time()
-	while(sense.center_line_detected() == "NONE" and time.time() - starting_drive_time < driving_timeout):
+	while(sense.center_line_detected() == "NONE"):
 		i2c.driveRobot(1, std_speed)
 		ir = sense.IR_read()
 		if(ir[0] == False):
-			#adjustFromBumper(0)
-			i2c.turnRobot(1, std_speed, 0.25)
-		elif(ir[2] == False):
-			#adjustFromBumper(2)
 			i2c.turnRobot(-1, std_speed, 0.25)
+		elif(ir[2] == False):
+			i2c.turnRobot(1, std_speed, 0.25)
 		else:
 			i2c.driveRobot(1, std_speed)
             		#print("Ultrasonics cannot see.")
 
 	center_status = sense.center_line_detected()
 	print(center_status)
-	#if(center_status == "YELLOW" or time.time()-starting_drive_time >= driving_timeout ):
+	if(center_status == "YELLOW"):
 	#	i2c.driveRobot(-1, 70)
-	#	time.sleep(backup_delay)
+	#	time.sleep(1)
 	#	i2c.stopRobot()
 	#elif(center_status == "PURPLE"):
 	#	i2c.driveRobot(1, 70)
 	#	time.sleep(1)
 	#	i2c.stopRobot()
 
-	print("Reached Node #" + str(end_node))
-
-def traverseToBlankNode(currNode, newNode, newBearing):
-    d = 1
-    opp_d = d*-1
-    if(currNode == 11 and newNode == 12):
-        i2c.driveRobot(1, std_speed)
-        time.sleep(blank_intersection_search_delay)
-        i2c.stopRobot
-        for i in range(5):
-            i2c.turn90(d)
-            while(sense.center_line_detected() == "NONE"):
-                i2c.driveRobot(1, std_speed)
-                time.sleep(0.03)
-            if(sense.center_line_detected() == "PURPLE"):
-                break;
-            else:
-                i2c.driveRobot(-1, std_speed)
-                i2c.turn90(opp_d)
-                i2c.driveRobot(1, std_speed)
-                time.sleep(blank_intersection_adj_delay)
-                
 
 def intersectionTurn(n, oldBearing, newBearing):
-    start_time = time.time()
-#    while(time.time() - start_time < intersection_delay):
-#	ir = sense.IR_read()
-#	if(False and ir[0] == False):
-#	    i2c.turnRobot(1, 80, 0.25)
-#	    start_time += 0.25
-#	elif(False and ir[2] == False):
-#	    i2c.turnRobot(-1, 80, 0.25)
-#	    start_time += 0.25
-#    	else:
-#	    i2c.driveRobot(1, std_speed*0.8)
     i2c.driveRobot(1, std_speed)
     time.sleep(intersection_delay)
     i2c.stopRobot()
@@ -122,18 +59,7 @@ def intersectionTurn(n, oldBearing, newBearing):
             print("Turning 90 deg ccw at intersection #" + str(n) + " ("+str(oldBearing)+"->"+str(newBearing)+")")
             i2c.turn90(1)
 
-    i2c.driveRobot(-1, std_speed)
-    time.sleep(0.4)
-
-    #Advance until second purple line
     while(sense.center_line_detected() == "NONE"):
-	ir = sense.IR_read()
-	if(ir[0] == False):
-		#adjustFromBumper(0)
-		i2c.turnRobot(1, 80, 0.25)
-	elif(ir[2] == False):
-		#adjustFromBumper(2)
-		i2c.turnRobot(-1, 80, 0.25)
         i2c.driveRobot(1, std_speed)
         time.sleep(0.01)
 
@@ -141,16 +67,11 @@ def intersectionTurn(n, oldBearing, newBearing):
     time.sleep(line_crossing_delay)
     i2c.stopRobot()
 
-    return newBearing
-
 
 def crossIntersection(old_dir, new_dir):
-	print("crossIntersection()")
 	if(old_dir == new_dir):
-		start_time = time.time()
-		print("OOPSIE")
-		#i2c.driveRobot(1, std_speed*0.8)
-		#time.sleep(0.5)
+		i2c.driveRobot(1, std_speed*0.8)
+		time.sleep(0.5)
 		while(sense.center_line_detected() == "NONE"):
 			ir = sense.IR_read()
 			if(ir[0] == False):
@@ -231,31 +152,18 @@ def traverseEdge():
     i2c.driveRobot(-70, 1 )
     time.sleep(10.01)
 
-def changeOrientation(n, current, new):
+def changeOrientation(current, new):
 
     diff = new - current
     for i in range(abs(diff)):
         #turnRobot90()
         if(diff > 0):
-            print("Turning 90 deg cw at #" + str(n) + " ("+str(current)+"->"+str(new)+")")
+            print("Turning 90 deg cw ("+str(current)+"->"+str(new)+")")
             i2c.turn90(-1)
         elif(diff < 0):
-            print("Turning 90 deg ccw at #" + str(n) + " ("+str(current)+"->"+str(new)+")")
+            print("Turning 90 deg ccw ("+str(current)+"->"+str(new)+")")
             i2c.turn90(1)
     
-    l = sense.Left_dis()
-    r = sense.Right_dis()
-    x = l-r
-
-    while(abs(x) > 5 and l < 15 and r < 15 and False):
-	print("Fixing bearing...")
-	if(x > 0):
-	    i2c.turnRobot(1, std_speed, 0.5)
-	else:
-	    i2c.turnRobot(-1, std_speed, 0.5)
-	
-	
-
     return new
 
 def traverseEdge2():

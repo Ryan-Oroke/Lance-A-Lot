@@ -13,19 +13,15 @@ def Camera_Process():
     while True:
         #Insert code that calls the pixy to look for a balloon
         #Once balloon or robot detected set detect = True
-	############################# Code for testing loop remove later ########################
-        trig = False
-        press = GPIO.input(button_pin)
-        if ((press == True) and (trig == False)):
-            print("button triggered")
-            trig = True
-            q.put(press)
-        elif press == False:
-            trig = False
-        time.sleep(0.05)
-        ########################################################################################
-        #if detect == True: ######################3 Commented out for testing
-            #q.put(detect) #sends info back to main process #############Commented out for testing
+        search = child_conn.recv()
+        if search == True:
+            # search for balloon
+            # for loop to test code struct 
+            for i in range(5):
+                detect = True
+            if detect == True:
+               child_conn.send(detect)
+               detect = False
 
 # exception classes for interrupting loops
 	# Technically exceptions are for error handling, but should work for our purposes
@@ -43,6 +39,7 @@ if __name__ == '__main__': #important syntax for using fork
     button_pin = 21
     GPIO.setup(button_pin, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
     ######################################################################### 
+    parent_conn, child_conn = Pipe()
     mp.set_start_method('fork')
     q = mp.Queue()
     Camera = mp.Process(target = Camera_Process)
@@ -64,8 +61,9 @@ if __name__ == '__main__': #important syntax for using fork
 		# is the defense mode where the robot will attempt to defend itself and pop the opponent balloon
 	    #
 	    # Mode 4:
-		# is when the robot sees the opponent and chases after it
+		# is when the robot sees the opponent and chases after it	
 
+		# Will delete if not statement to replace with signal handler
             if not q.empty():
                 event = q.get()
                 print("opponent detected")

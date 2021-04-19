@@ -14,15 +14,23 @@ def signal_handler(sig, frame_sig):
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
-start_dir = 3
+start_dir = 1
 def main():
-	i2c.sendMessage("SV170")
-	dir = traverseGraph(start_dir, 81, 82)
-	i2c.sendMessage("SV020")
-	dir = traverseGraph(dir, 41, 82)
-	i2c.sendMessage("SV170")
-	dir = traverseGraph(dir, 81, 82)
-	dir = traverseGraph(dir, 82, 1)
+	dir = traverseGraph(start_dir, 1, 12)
+	dir = traverseGraph(dir, 31, 11)
+	dir = traverseGraph(dir, 11,21)
+	dir = traverseGraph(dir, 21, 41)
+	#i2c.sendMessage("SV170")
+	#dir = traverseGraph(start_dir, 21, 42)
+	#i2c.sendMessage("SV020")
+	#dir = traverseGraph(dir, 42, 82)
+	#dir = traverseGraph(start_dir, 82, 42)
+	#i2c.sendMessage("SV170")
+	#dir = traverseGraph(dir, 42, 41)
+	#i2c.sendMessage("SV020")
+	#dir = traverseGraph(dir, 41, 81)
+	#i2c.sendMessage("SV170")
+	#dir = traverseGraph(dir, 81, 11)
 
 
 def traverseGraph(bearing, s, t):
@@ -92,14 +100,14 @@ def traverseGraph(bearing, s, t):
 			time.sleep(1.25)
 			i2c.driveRobot(1, 60)
 			time.sleep(1.25)
-	    elif(path[i+1] in balloon_nodes):
+	    elif(path[i+1] in blank_intersection_nodes):
 		print("Backing away from balloon")
 		i2c.driveRobot(-1, 60)
 		time.sleep(2)
 	    else:
 	    	current_orientation = robot.changeOrientation(path[i+1], current_orientation, path_edges_orientation[i+1])
 
-	robot.traverseEdge3(path[i+1], -1)
+	robot.traverseEdge3(path[i], path[i+1])
 
 	return current_orientation
 

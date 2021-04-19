@@ -22,7 +22,7 @@ while True:
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     #Yellow
-    lower_bound = np.array([15, 80, 80])
+    lower_bound = np.array([15, 40, 40])
     upper_bound = np.array([60, 215, 215])
 
     #Purple

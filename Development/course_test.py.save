@@ -14,12 +14,13 @@ def signal_handler(sig, frame_sig):
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
-start_dir = 3
+start_dir = 1
 def main():
 	i2c.sendMessage("SV170")
-	dir = traverseGraph(start_dir, 81, 82)
-	i2c.sendMessage("SV020")
-	dir = traverseGraph(dir, 41, 82)
+	dir = traverseGraph(start_dir, 1, 83)
+	dir = traverseGraph(start_dir, 83, 41)
+	i2c.sendMessage("SV000")
+	dir = traverseGraph(dir, 41, 81)
 	i2c.sendMessage("SV170")
 	dir = traverseGraph(dir, 81, 82)
 	dir = traverseGraph(dir, 82, 1)
@@ -34,28 +35,21 @@ def traverseGraph(bearing, s, t):
 	G = nx.DiGraph()
 
 	starting_nodes = [1, 2]
-	corner_nodes = [31, 32]
+	corner_nodes = [31]
 	intersection_nodes = [11, 21]
-        blank_intersection_nodes = [12]
 	balloon_corners = [41, 42]
-	balloon_nodes = [81, 82, 83]
+	balloon_nodes = [81, 82]
 
 	G.add_nodes_from(starting_nodes)
 	G.add_nodes_from(corner_nodes)
 	G.add_nodes_from(intersection_nodes)
-	G.add_nodes_from(blank_intersection_nodes)
 	G.add_nodes_from(balloon_nodes)
 
-	#edges = [(1,31,N), (31,11,E), (11,21,N), (21,41,W), (41,81,S), (81,41,N), (41,21,E), (21,42,E), (42,82,S)]
-	#edges2 = [(82,42,N),(42,21,W),(21,11,S),(11,31,W),(31,1,S)]
-
-	edges = [(1,31,N),(31,1,S), (31,11,E),(11,31,W), (11,21,N),(21,11,S), (21,41,W),(41,21,E),\
-            (41,81,S),(81,41,N), (21,42,E),(42,21,W), (42,82,S),(82,42,N), (11,83,S),(83,11,N),\
-            (11,12,E),(12,11,W), (12,63,S),(63,12,N), (63,92,W),(92,63,E)]
-
+	edges = [(1,31,N), (31,11,E), (11,21,N), (21,41,W), (41,81,S), (81,41,N), (41,21,E), (21,42,E), (42,82,S)]
+	edges2 = [(82,42,N),(42,21,W),(21,11,S),(11,31,W),(31,1,S)]
 
 	G.add_weighted_edges_from(edges)
-	#G.add_weighted_edges_from(edges2)
+	G.add_weighted_edges_from(edges2)
 
 	#Can't do this on the Pi
 	#plt.plot()
@@ -87,15 +81,6 @@ def traverseGraph(bearing, s, t):
 		current_orientation = robot.intersectionTurn(path[i+1], current_orientation, path_edges_orientation[i+1])
 	    elif(path[i+1] in balloon_nodes):
 		print("Time to look for the balloon!")
-		for i in range(5):
-			i2c.driveRobot(-1, 60)
-			time.sleep(1.25)
-			i2c.driveRobot(1, 60)
-			time.sleep(1.25)
-	    elif(path[i+1] in balloon_nodes):
-		print("Backing away from balloon")
-		i2c.driveRobot(-1, 60)
-		time.sleep(2)
 	    else:
 	    	current_orientation = robot.changeOrientation(path[i+1], current_orientation, path_edges_orientation[i+1])
 
