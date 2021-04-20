@@ -23,19 +23,12 @@ def signal_handler(sig, frame_sig):
 signal.signal(signal.SIGINT, signal_handler)
 
 #Establish the starting orientation of the robot.
-start_dir = 1
+start_dir = 2
 
 def main():
 	#Calls the traverseGraph function to travel between nodes. Also raises and lowers servo when needed with i2c. 
 	i2c.lowerLance()
-	dir = traverseGraph(start_dir, 1, 82)
-	dir = traverseGraph(dir, 82, 81)
-	dir = traverseGraph(dir, 81, 84)
-	#dir = traverseGraph(dir, 12, 63)
-	#i2c.raiseLance()
-	#dir = traverseGraph(dir, 63, 84)
-	i2c.lowerLance()
-	dir = traverseGraph(dir, 84, 1)
+	dir = traverseGraph(start_dir, 31, 92)
 	#dir = traverseGraph(dir, 31, 11)
 	#dir = traverseGraph(dir, 11,21)
 	#dir = traverseGraph(dir, 21, 41)
@@ -71,7 +64,7 @@ def traverseGraph(bearing, s, t):
 	intersection_nodes = [11, 21]
         blank_intersection_nodes = [12]
 	balloon_corners = [41, 42, 63]
-	balloon_nodes = [81, 82, 83, 84]
+	balloon_nodes = [81, 82, 83]
 
 	#Add nodes to the graph
 	G.add_nodes_from(starting_nodes)
@@ -83,7 +76,7 @@ def traverseGraph(bearing, s, t):
 	#Edges used to connected the nodes (starting_node, end_node, weight/direction)
 	edges = [(1,31,N),(31,1,S), (31,11,E),(11,31,W), (11,21,N),(21,11,S), (21,41,W),(41,21,E),\
             (41,81,S),(81,41,N), (21,42,E),(42,21,W), (42,82,S),(82,42,N), (11,83,S),(83,11,N),\
-            (11,12,E),(12,11,W), (12,63,S),(63,12,N), (63,84,W),(84,63,E)]
+            (11,12,E),(12,11,W), (12,63,S),(63,12,N), (63,92,W),(92,63,E)]
 
 	#Connect the graph
 	G.add_weighted_edges_from(edges)
@@ -121,42 +114,40 @@ def traverseGraph(bearing, s, t):
 	#Traverse all of the edges in the pre-planned path
 	for i in range(len(path_edges)-1):
 
-		#Traverse the edge
-		if(path[i+1] in blank_intersection_nodes):
-			print("traverseToBlankNode() executing...")
-			current_orientation = robot.traverseToBlankNode(path[i], path[i+1], path_edges_orientation[0])
-		else:
-			print("traverseEdge3() executing...")
-			robot.traverseEdge3(path[i], path[i+1])
+	    #Traverse the edge
+	    if(path[i+1] in blank_intersection_nodes):
+		print("traverseToBlankNode() executing...")
+		robot.traverseToBlankNode(path[i], path[i+1], path_edges_orientation[0])
+	   
 
+	    #Sometimes we need to do special things after edge traversal, do those here:
+	    elif(path[i+1] in intersection_nodes):
+		#Perform and intersection specific turn
+		current_orientation = robot.intersectionTurn(path[i+1], current_orientation, path_edges_orientation[i+1])
 
-		#Sometimes we need to do special things after edge traversal, do those here:
-		if(path[i+1] in intersection_nodes):
-			#Perform and intersection specific turn
-			current_orientation = robot.intersectionTurn(path[i+1], current_orientation, path_edges_orientation[i+1])
+	    elif(path[i+1] in balloon_nodes and False):
+		#Attack the balloon! (This is not working yet...)
+		print("Time to look for the balloon!")
+		for i in range(5):
+			i2c.driveRobot(-1, 60)
+			time.sleep(1.25)
+			i2c.driveRobot(1, 60)
+			time.sleep(1.25)
 
-		elif(path[i+1] in balloon_nodes and False):
-			#Attack the balloon! (This is not working yet...)
-			print("Time to look for the balloon!")
-			for i in range(5):
-				i2c.driveRobot(-1, 60)
-				time.sleep(1.25)
-				i2c.driveRobot(1, 60)
-				time.sleep(1.25)
-
-		elif(path[i+1] in blank_intersection_nodes):
+	    elif(path[i+1] in blank_intersection_nodes):
 		#Used for finding "blank" or "hidden" intersections since they lack tape across the path near them.
 
 		#YET TO BE INSTANTIATED (CODE WRITTEN THOUGH)
-
+ 
 		#print("Backing away from balloon")
 		#i2c.driveRobot(-1, 60)
 		#time.sleep(2)
-			pass
-		else:
-		#If none of these happen, we have reached a yellow corner. Therein use the standard turning package.
-			current_orientation = robot.changeOrientation(path[i+1], current_orientation, path_edges_orientation[i+1])
 
+	    else:
+		#If none of these happen, we have reached a yellow corner. Therein use the standard turning package.
+			print("traverseEdge3() executing...")
+			robot.traverseEdge3(path[i], path[i+1])
+			current_orientation = robot.changeOrientation(path[i+1], current_orientation, path_edges_orientation[i+1]
 	#End of FOR loop
 
 	#We have to add a final traverse edge since we only do up to path[end-1] in the FOR loop

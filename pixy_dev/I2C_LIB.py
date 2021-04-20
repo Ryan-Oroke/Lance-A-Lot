@@ -85,7 +85,7 @@ def driveRobot(dir, speed):
     driveMotor("B", dir*speed)
 
 def raiseLance():
-    i2c.sendMessage("SV020")
+    sendMessage("SV020")
 
 def lowerLance():
-    i2c.sendMessage("SV170")
+    sendMessage("SV170")

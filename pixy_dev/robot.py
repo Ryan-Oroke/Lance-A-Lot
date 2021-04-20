@@ -27,13 +27,31 @@ short_backup_delay = 0.2
 #driving_timeout = 12
 driving_timeout = 9
 
-blank_intersection_search_delay = 3
+blank_intersection_search_delay = 3.4
 blank_intersection_adj_delay = 0.5
 
 turn_bumper_delay = 1.2
 turn90_time = 1.0
 
-)
+oriented_threshold = 75
+
+def initialOrient():
+    i2c.lowerLance()
+    dist = sense.Left_dis()
+    print(dist)
+    while(True):
+	print(dist)
+        i2c.turnRobot(1, std_speed, 0.4)
+        i2c.stopRobot()
+        time.sleep(0.25)
+	dist = sense.Left_dis()
+	if(dist > oriented_threshold and dist < 120):
+		print("Oriented: " + str(dist))
+		break
+
+    i2c.turnRobot(1, std_speed, 2)
+
+
 
 def traverseEdge3(start_node, end_node):
 	#PRIMARY EDGE TRAVERSAL ALGORITHM (IGNORE 1 AND 2)
@@ -82,7 +100,7 @@ def traverseToBlankNode(currNode, newNode, newBearing):
     #Used for traversal to the hidden intersections (12, 13)
 
     #d and opp_d are simple used to make adjusting the correct turning direction easier.
-    d = 1
+    d = -1
     opp_d = d*-1
 
     #Make sure robot is heading for the correct node.  
@@ -91,7 +109,10 @@ def traverseToBlankNode(currNode, newNode, newBearing):
         time.sleep(blank_intersection_search_delay)
         i2c.stopRobot
 
+	print("Searching for line...")
 	#Drive over to see if robot has reached a purple line. If not, adjust accordingly a couple times before giving up.
+	#if(sense.center_line_detected() != "PURPLE"):
+	print("Line not seen")
         for i in range(5):
             i2c.turn90(d)
             while(sense.center_line_detected() == "NONE"):
@@ -104,7 +125,13 @@ def traverseToBlankNode(currNode, newNode, newBearing):
                 i2c.turn90(opp_d)
                 i2c.driveRobot(1, std_speed)
                 time.sleep(blank_intersection_adj_delay)
-                
+
+	print("Crossing intersection...")
+	i2c.driveRobot(1, std_speed)
+	time.sleep(line_crossing_delay)
+	i2c.stopRobot()
+	
+	return newBearing+1
 
 def intersectionTurn(n, oldBearing, newBearing):
     #PRIMARY FUNCTION FOR INTERSECTION (VISIBLE) TRAVERSAL
@@ -161,7 +188,7 @@ def adjustFromBumper(bumper_num):
 	if(sense.center_line_detected() == "YELLOW"):
 		i2c.turnRobot(-1*dir, std_speed, turn_bumper_delay + 0.25)
 	elif(sense.center_line_detected() != "PURPLE"):
-		i2c.turnRobot(-1*dir, std_speed, 0.25
+		i2c.turnRobot(-1*dir, std_speed, 0.25)
 
 def changeOrientation(n, current, new):
     #PRIMARY PACKAGE USED FOR TURNING IN YELLOW CORNERS
@@ -189,7 +216,7 @@ def changeOrientation(n, current, new):
 	else:
 	    i2c.turnRobot(-1, std_speed, 0.5)
 
-
+    return new
 
 
 
@@ -290,12 +317,6 @@ def traverseEdge():
     print("Reached tape!")
     i2c.driveRobot(-70, 1 )
     time.sleep(10.01)
-
-)
-	
-	
-
-    return new
 
 def traverseEdge2():
     print("Driving Forward...")
