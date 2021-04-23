@@ -24,12 +24,29 @@ signal.signal(signal.SIGINT, signal_handler)
 
 #Establish the starting orientation of the robot.
 start_dir = 1
+red = 1
+blue = 2
+color = blue
+
+N = 1
+E = 2
+S = 3
+W = 4
 
 def main():
 	#Calls the traverseGraph function to travel between nodes. Also raises and lowers servo when needed with i2c. 
 	i2c.lowerLance()
-	dir = traverseGraph(start_dir, 1, 82)
-	dir = traverseGraph(dir, 82, 81)
+	time.sleep(1)
+	dir = start_dir
+	dir = traverseGraph(dir, 1, 42)
+	#dir = traverseGraph(dir, 21, 42)
+	dir = robot.changeOrientation(42, E, S)
+	dir = balloonDecision(dir, color, 42, 82)
+	
+	dir = traverseGraph(dir, 42, 41)
+	dir = robot.changeOrientation(41, W, S)
+	dir = balloonDecision(dir, color, 41, 81)
+
 	dir = traverseGraph(dir, 81, 84)
 	#dir = traverseGraph(dir, 12, 63)
 	#i2c.raiseLance()
@@ -124,7 +141,8 @@ def traverseGraph(bearing, s, t):
 		#Traverse the edge
 		if(path[i+1] in blank_intersection_nodes):
 			print("traverseToBlankNode() executing...")
-			current_orientation = robot.traverseToBlankNode(path[i], path[i+1], path_edges_orientation[0])
+			current_orientation = robot.traverseToBlankNode(path[i], path[i+1], path_edges_orientation[i])
+			#robot.adjustNodeEntrance()
 		else:
 			print("traverseEdge3() executing...")
 			robot.traverseEdge3(path[i], path[i+1])
@@ -165,7 +183,19 @@ def traverseGraph(bearing, s, t):
 	#Return the new orientation of the robot to keep track of things for successive calls. 
 	return current_orientation
 
+def balloonDecision(dir, c, n1, n2):
+	i2c.stopRobot()
+	time.sleep(1)
+	if(pix.balloonSeen(c)):
+		print("!!!KILL THAT BALLOON!!!")
+		i2c.raiseLance()
+		dir = traverseGraph(dir, n1, n2)
+		dir = traverseGraph(dir, n2, n1)
+		i2c.lowerLance()
+	else:
+		print("Nah...not feeling it...")
 
+	return dir
 
 
 #Allows for a main() loop to be placed above everything else

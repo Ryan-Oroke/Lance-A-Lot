@@ -33,28 +33,26 @@ blank_intersection_adj_delay = 0.5
 turn_bumper_delay = 1.2
 turn90_time = 1.0
 
-oriented_threshold = 110
+oriented_threshold = 75
 
 def adjustNodeEntrance():
-	turn_delay = 0.9
+	turn_delay = 0.8
 	forward_delay = 0.5
 	i2c.stopRobot()
 	i2c.turnRobot(1, std_speed, turn_delay)
 	if(sense.center_line_detected() != "PURPLE"):
 		start_time = time.time()
 		while(sense.center_line_detected() == "NONE" and time.time() - start_time < forward_delay):
-			i2c.driveRobot(1, std_speed)
+			i2c.driveRobot(1, std_speed, forward_delay)
 		unwind_time = time.time() - start_time
-		i2c.driveRobot(-1, std_speed)
-		#print("Unwind time.")
-		time.sleep(unwind_time)
 		i2c.turnRobot(-1, std_speed, turn_delay*1.3)
-
+		i2c.driveRobot(1, std_speed)
+		print("Unwind time.")
+		time.sleep(unwind_time)
 	else:
-		i2c.turnRobot(-1, std_speed, turn_delay)
+		i2c.turnRobot(-1, std_speed)
+		time.sleep turn_delay)
 
-	i2c.driveRobot(1, std_speed)
-	time.sleep(0.75)
 	i2c.stopRobot()
 
 def initialOrient():
@@ -67,7 +65,7 @@ def initialOrient():
         i2c.stopRobot()
         time.sleep(0.25)
 	dist = sense.Left_dis()
-	if(dist > oriented_threshold and dist < 115):
+	if(dist > oriented_threshold and dist < 120):
 		print("Oriented: " + str(dist))
 		break
 
@@ -107,17 +105,14 @@ def traverseEdge3(start_node, end_node):
 	if(center_status == "YELLOW" or time.time()-starting_drive_time >= driving_timeout ):
 		i2c.driveRobot(-1, 70)
 		if(end_node == 41 or end_node == 42 or end_node == 63):
-			print("Short backup.")
 			time.sleep(short_backup_delay)
 		else:
 			time.sleep(backup_delay)
 		i2c.stopRobot()
-	elif(center_status == "PURPLE"):
-		ir = sense.IR_read()
-		if(ir[0] == False):
-			i2c.turnRobot(1, std_speed, 0.25)
-		elif(ir[2] == False):
-			i2c.turnRobot(-1, std_speed, 0.25)
+	#elif(center_status == "PURPLE"):
+	#	i2c.driveRobot(1, 70)
+	#	time.sleep(1)
+	#	i2c.stopRobot()
 
 	print("Reached Node #" + str(end_node))
 

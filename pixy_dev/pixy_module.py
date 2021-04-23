@@ -35,6 +35,8 @@ def balloonSeen(s):
 	                print('[BLOCK: SIG=%d X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d]' % (blocks[index].m_signature, blocks[index].m_x, blocks[index].m_y, blocks[index].m_width, blocks[index].m_height))
 			if(blocks[index].m_signature == s and blocks[index].m_height > min_balloon_height):
 				return True
+	else:
+		print("No frames found.")
 	return False
 
 def chaseBalloon(s):
