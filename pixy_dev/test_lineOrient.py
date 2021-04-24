@@ -1,0 +1,3 @@
+import robot
+
+robot.lineBasedOrient()

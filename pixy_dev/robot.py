@@ -1,6 +1,7 @@
 import time
 import I2C_LIB as i2c
 import Sensors as sense
+import pixy_module as pix
 #from simple_pid import PID
 
 #std_speed = 65
@@ -31,9 +32,10 @@ blank_intersection_search_delay = 3.4
 blank_intersection_adj_delay = 0.5
 
 turn_bumper_delay = 1.2
-turn90_time = 1.0
+turn90_time = 1.05
+adj_delay = 0.125
 
-oriented_threshold = 110
+oriented_threshold = 100
 
 def adjustNodeEntrance():
 	turn_delay = 0.9
@@ -73,6 +75,39 @@ def initialOrient():
 
     i2c.turnRobot(1, std_speed, 2)
 
+def lineBasedOrient():
+	timeout = 6.5
+	single_shot_timeout = 3
+	start_time = time.time()
+	while(True):
+		i2c.turnRobot(1, std_speed, 3*adj_delay)
+		while(sense.center_line_detected() == "NONE"):
+			single_shot_start_time = time.time()
+			i2c.driveRobot(1, std_speed)
+			ir = sense.IR_read()
+			if(ir[0] == False):
+				i2c.driveRobot(-1, std_speed)
+				time.sleep(5*adj_delay)
+				i2c.turnRobot(1, std_speed, 3*adj_delay)
+				start_time += 8*adj_delay
+				single_shot_start_time += 8*adj_delay
+			elif(ir[2] == False):
+				i2c.driveRobot(-1, std_speed)
+				time.sleep(5*adj_delay)
+				i2c.turnRobot(-1, std_speed, 3*adj_delay)
+				start_time += 8*adj_delay
+				single_shot_start_time += 8*adj_delay
+			if(time.time() - single_shot_start_time > single_shot_timeout):
+				i2c.driveRobot(-1, std_speed)
+				time.sleep(3)
+				start_time += 3
+
+		if(time.time() - start_time > timeout):
+			break
+		else:
+			start_time = time.time()
+	i2c.stopRobot()
+
 
 
 def traverseEdge3(start_node, end_node):
@@ -91,10 +126,10 @@ def traverseEdge3(start_node, end_node):
 		ir = sense.IR_read()
 		if(ir[0] == False):
 			#adjustFromBumper(0)
-			i2c.turnRobot(1, std_speed, 0.25)
+			i2c.turnRobot(1, std_speed, adj_delay)
 		elif(ir[2] == False):
 			#adjustFromBumper(2)
-			i2c.turnRobot(-1, std_speed, 0.25)
+			i2c.turnRobot(-1, std_speed, adj_delay)
 		else:
 			i2c.driveRobot(1, std_speed)
             		#print("Ultrasonics cannot see.")
@@ -115,9 +150,9 @@ def traverseEdge3(start_node, end_node):
 	elif(center_status == "PURPLE"):
 		ir = sense.IR_read()
 		if(ir[0] == False):
-			i2c.turnRobot(1, std_speed, 0.25)
+			i2c.turnRobot(1, std_speed, adj_delay)
 		elif(ir[2] == False):
-			i2c.turnRobot(-1, std_speed, 0.25)
+			i2c.turnRobot(-1, std_speed, adj_delay)
 
 	print("Reached Node #" + str(end_node))
 
@@ -160,13 +195,27 @@ def traverseToBlankNode(currNode, newNode, newBearing):
 	
 	return newBearing+1
 
-def intersectionTurn(n, oldBearing, newBearing):
+def intersectionTurn(n, oldBearing, newBearing, color):
     #PRIMARY FUNCTION FOR INTERSECTION (VISIBLE) TRAVERSAL
 
     #Drive into the middle of the intersection
     i2c.driveRobot(1, std_speed)
     time.sleep(intersection_delay)
     i2c.stopRobot()
+
+#Check to see if our balloon is there
+    td = 2
+    i2c.lowerLance()
+    if(n == 11):
+        oldBearing = changeOrientation(n, oldBearing, 3)
+        if(pix.balloonSeen(color)):
+            i2c.raiseLance()
+            i2c.driveRobot(1, std_speed)
+            time.sleep(td)
+            i2c.driveRobot(-1, std_speed)
+            time.sleep(td)
+            i2c.lowerLance()
+        oldBearing = changeOrientation(n, oldBearing, newBearing)
 
     #Adjust our bearing (in 90 degree segments) 
     diff = newBearing - oldBearing
@@ -188,12 +237,14 @@ def intersectionTurn(n, oldBearing, newBearing):
 	ir = sense.IR_read()
 	if(ir[0] == False):
 		#adjustFromBumper(0)
-		i2c.turnRobot(1, 80, 0.25)
+		i2c.turnRobot(1, 80, adj_delay)
 	elif(ir[2] == False):
 		#adjustFromBumper(2)
-		i2c.turnRobot(-1, 80, 0.25)
+		i2c.turnRobot(-1, 80, adj_delay)
         i2c.driveRobot(1, std_speed)
         time.sleep(0.01)
+
+
 
     #Delay used to ensure robot doesn't pick up line a second time
     i2c.driveRobot(1, std_speed)

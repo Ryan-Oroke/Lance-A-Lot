@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import os, signal
 import time
 import subprocess
+import I2C_LIB as i2c
 
 color_pin = 1
 start_stop_pin = 23
@@ -29,6 +30,7 @@ while(True and pid > 0):
             #pid = os.fork() #Start the process!
 	    devnull = open('/dev/null', 'w')
 	    p = subprocess.Popen(["python", "course_test.py"])
+		#"course_test.py"])
 	    pid = p.pid
 	    print("Child PID: " + str(pid))
         else:
@@ -40,17 +42,17 @@ while(True and pid > 0):
         if(GPIO.input(start_stop_pin) == off_state):
             #for i in range(25):
 	    print("Killing child process: " + str(pid))
-            os.kill(pid, signal.SIGINT)
-            info = os.waitpid(pid, 0)
-            stopSignal = os.WSTOPSIG(info[1])
-            running = False
-            print("Process Stopped:", stopSignal, info)
+	    while p.poll() is None:
+	    	os.kill(pid, 9)
+	    running = False
+	    i2c.stopRobot()
         else:
             print("False negative received.")
 
     elif(running == False and GPIO.input(start_stop_pin) == off_state):
 	#print("Waiting for input to start run.")
 	time.sleep(1)
+
 
 if(pid == 0):
     pass

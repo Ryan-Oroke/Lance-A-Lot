@@ -26,7 +26,7 @@ signal.signal(signal.SIGINT, signal_handler)
 start_dir = 1
 red = 1
 blue = 2
-color = blue
+color = red
 
 N = 1
 E = 2
@@ -34,10 +34,14 @@ S = 3
 W = 4
 
 def main():
+	robot.lineBasedOrient()
+
 	#Calls the traverseGraph function to travel between nodes. Also raises and lowers servo when needed with i2c. 
 	i2c.lowerLance()
 	time.sleep(1)
 	dir = start_dir
+	#dir = traverseGraph(dir, , 43)
+	#exit(0)
 	dir = traverseGraph(dir, 1, 42)
 	#dir = traverseGraph(dir, 21, 42)
 	dir = robot.changeOrientation(42, E, S)
@@ -52,7 +56,7 @@ def main():
 	#i2c.raiseLance()
 	#dir = traverseGraph(dir, 63, 84)
 	i2c.lowerLance()
-	dir = traverseGraph(dir, 84, 1)
+	dir = traverseGraph(dir, 84, 43)
 	#dir = traverseGraph(dir, 31, 11)
 	#dir = traverseGraph(dir, 11,21)
 	#dir = traverseGraph(dir, 21, 41)
@@ -85,9 +89,9 @@ def traverseGraph(bearing, s, t):
 	#Node lists used to build the graph
 	starting_nodes = [1, 2]
 	corner_nodes = [31, 32]
-	intersection_nodes = [11, 21]
-        blank_intersection_nodes = [12]
-	balloon_corners = [41, 42, 63]
+	intersection_nodes = [11, 21, 12, 13, 14]
+        blank_intersection_nodes = [99]
+	balloon_corners = [41, 42, 63, 43]
 	balloon_nodes = [81, 82, 83, 84]
 
 	#Add nodes to the graph
@@ -102,8 +106,10 @@ def traverseGraph(bearing, s, t):
             (41,81,S),(81,41,N), (21,42,E),(42,21,W), (42,82,S),(82,42,N), (11,83,S),(83,11,N),\
             (11,12,E),(12,11,W), (12,63,S),(63,12,N), (63,84,W),(84,63,E)]
 
+	edges2 = [(12,13,E),(13,12,W),(13,14,E),(14,13,W),(13,43,N),(43,13,S)]
 	#Connect the graph
 	G.add_weighted_edges_from(edges)
+	G.add_weighted_edges_from(edges2)
 
 	#Can't do this on the Pi over SSH
 	#plt.plot()
@@ -139,7 +145,7 @@ def traverseGraph(bearing, s, t):
 	for i in range(len(path_edges)-1):
 
 		#Traverse the edge
-		if(path[i+1] in blank_intersection_nodes):
+		if(path[i+1] in blank_intersection_nodes and False):
 			print("traverseToBlankNode() executing...")
 			current_orientation = robot.traverseToBlankNode(path[i], path[i+1], path_edges_orientation[i])
 			#robot.adjustNodeEntrance()
@@ -151,7 +157,7 @@ def traverseGraph(bearing, s, t):
 		#Sometimes we need to do special things after edge traversal, do those here:
 		if(path[i+1] in intersection_nodes):
 			#Perform and intersection specific turn
-			current_orientation = robot.intersectionTurn(path[i+1], current_orientation, path_edges_orientation[i+1])
+			current_orientation = robot.intersectionTurn(path[i+1], current_orientation, path_edges_orientation[i+1], color)
 
 		elif(path[i+1] in balloon_nodes and False):
 			#Attack the balloon! (This is not working yet...)
