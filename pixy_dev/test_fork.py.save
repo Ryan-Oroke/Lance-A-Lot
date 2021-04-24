@@ -1,0 +1,70 @@
+import RPi.GPIO as GPIO
+import os, signal
+import time
+import subprocess
+
+color_pin = 1
+start_stop_pin = 23
+
+GPIO.setmode(GPIO.BCM)
+
+GPIO.setup(start_stop_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+# GPIO.add_event_detect(start_stop_pin, GPIO.RISING, callback=startRun())
+# GPIO.add_event_detect(start_stop_pin, GPIO.RISING, callback=stopRun())
+
+running = False
+pid = 9999
+off_state = 1
+on_state = 0
+while(True and pid > 0):
+    #PARENT ONLY
+
+    #NOT RUNNING 
+    if(running == False and GPIO.input(start_stop_pin) == on_state):
+        time.sleep(0.2)
+        if(GPIO.input(start_stop_pin) == 0):
+            time.sleep(0.5)
+            running = True
+            print("Process Starting")
+            #pid = os.fork() #Start the process!
+	    devnull = open('/dev/null', 'w')
+	    p = subprocess.Popen(["python", "course_test.py"])
+		#"course_test.py"])
+	    pid = p.pid
+	    print("Child PID: " + str(pid))
+        else:
+            print("False positive recieved.")
+
+    #RUNNING 
+    elif(running == True and GPIO.input(start_stop_pin) == off_state):
+        time.sleep(0.2)
+        if(GPIO.input(start_stop_pin) == off_state):
+            #for i in range(25):
+	    print("Killing child process: " + str(pid))
+	    try:
+            	while(p.poll() is None):
+			os.kill(pid, signal.SIGINT)
+            	info = os.waitpid(pid, 0)
+		running = False
+		
+	    except:
+		running = True
+            #stopSignal = os.WSTOPSIG(info[1])
+            #running = False
+            
+        else:
+            print("False negative received.")
+
+    elif(running == False and GPIO.input(start_stop_pin) == off_state):
+	#print("Waiting for input to start run.")
+	time.sleep(1)
+
+
+if(pid == 0):
+    pass
+    #os.system("python turn_test.py")
+    #while(True):
+    #    print("Hello from the child process!")
+    #    time.sleep(1)
+
+print("The top-level process has terminated!!!")
