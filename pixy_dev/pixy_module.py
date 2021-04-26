@@ -53,6 +53,19 @@ def chaseBalloon(s):
 	start_time = time.time()
 	x_center = 150
 	while(time.time() - start_time < timeout):
+		std_speed = 65
+		adj_delay = 0.75
+		ir = sense.IR_read()
+		if(ir[0] == False):
+			#adjustFromBumper(0)
+			i2c.turnRobot(1, std_speed, adj_delay)
+		elif(ir[2] == False):
+			#adjustFromBumper(2)
+			i2c.turnRobot(-1, std_speed, adj_delay)
+		else:
+			i2c.driveRobot(1, std_speed)
+		            #print("Ultrasonics cannot see.")
+		
 		count = pixy.ccc_get_blocks(100, blocks)
 		print(count)
 		if(count > 0):

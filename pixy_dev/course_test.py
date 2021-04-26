@@ -69,16 +69,19 @@ def main():
 	dir = traverseGraph(dir, 81, 63)
 	dir = robot.changeOrientation(63, S, W)
 	dir = balloonDecision(dir, color, 63, 84)
+	
+	try:
+		dir = traverseGraph(dir, 84, 43)
+		#dir = robot.changeOrientation(43, N, E)
+		i2c.turnRobot(-1, 80, 1)
+		dir = E
+		dir = balloonDecision(dir, color, 43, 87)
 
-	dir = traverseGraph(dir, 84, 43)
-	#dir = robot.changeOrientation(43, N, E)
-	i2c.turnRobot(-1, 80, 1)
-	dir = E
-	dir = balloonDecision(dir, color, 43, 87)
-
-	dir = traverseGraph(dir, 87, 13)
-	#dir = robot.changeOrientation(13, S, E)
-	i2c.driveRobot(1, 80)
+		dir = traverseGraph(dir, 87, 13)
+		#dir = robot.changeOrientation(13, S, E)
+		i2c.driveRobot(1, 80)
+	except:
+		pass
 
 	#randomMode()
 	rt.randControl(dir, color, 300 - (time.time() - starting_time))

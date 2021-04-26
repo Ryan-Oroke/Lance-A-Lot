@@ -15,7 +15,7 @@ bus = smbus.SMBus(1)
 i2c_address = 0x36
 i2c_cmd = 0x01
 
-adj_A = 1.05
+adj_A = 1.07
 delay90 = 0.82
 
 def convertStringToBytes(src):

@@ -30,14 +30,17 @@ def randControl(dir, color, time_remaining):
 	#dir = robot.traverseEdge3(1, 2)
 	while(time_remaining > time.time() - start_time):
 		robot.traverseEdge3(1, 2)
-		i2c.driveRobot(1, 80)
-		time.sleep(0.25)
-		i2c.stopRobot()
+		#i2c.driveRobot(1, 80)
+		#time.sleep(0.25)
+		#i2c.stopRobot()
 		if(sense.center_line_detected() == "PURPLE"):
 			#Intersection
 			print("Hit purple line.")
-			scanForBalloon(color)
+			#scanForBalloon(color)
+			i2c.driveRobot(1, 60)
+			time.sleep(0.5)
 			dir = robot.intersectionTurn(0, dir, newDir(dir, False), color)
+			scanForBalloon(color)
 		else:
 			#(sense.center_line_detected() == "YELLOW"):
 			#i2c.sendMessage("SV170")
@@ -45,6 +48,8 @@ def randControl(dir, color, time_remaining):
 			i2c.driveRobot(-1, 60)
 			time.sleep(1)
 			scanForBalloon(color)
+			i2c.driveRobot(1, 60)
+			time.sleep(1)
 			same_not_possible = False;
 			#dir = changeOrientation(0, dir, newDir(dir, same_not_possible))
 			new_d = random.randint(1, 3) - 2
@@ -53,18 +58,21 @@ def randControl(dir, color, time_remaining):
 			#i2c.sendMessage("SV000")
 
 def newDir(d, can_be_same):
-	r = random.randint(1,5)
-	while(r != d):
-		rev_dir = d - 2
-		if(rev_dir < 1):
-			rev_dir = 4 -  rev_dir 
+	try:
 		r = random.randint(1,5)
-	print("debug1")
-	if(can_be_same == False and r == dir):
-		r = r - 1
-		if(r == 0):
-			r = 4
-	return r
+		while(r != d):
+			rev_dir = d - 2
+			if(rev_dir < 1):
+				rev_dir = 4 -  rev_dir 
+			r = random.randint(1,5)
+		print("debug1")
+		if(can_be_same == False and r == dir):
+			r = r - 1
+			if(r == 0):
+				r = 4
+		return r
+	except:
+		return 4
 
 def scanForBalloon(color):
 	i2c.lowerLance
