@@ -18,18 +18,21 @@ def signal_handler(sig, frame_sig):
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
-dir = 1
-color = 1
+#dir = 1
+#color = 2
 
-def main():
-	dir = 1
+def randControl(dir, color, time_remaining):
+	start_time = time.time()
 	random.seed(time.time())
 	i2c.sendMessage("SV170")
 	#dir = robot.traverseEdge3(0, 1)
 	#dir = robot.changeOrientation(0, 1, newDir(1, False))
 	#dir = robot.traverseEdge3(1, 2)
-	while(True):
+	while(time_remaining > time.time() - start_time):
 		robot.traverseEdge3(1, 2)
+		i2c.driveRobot(1, 80)
+		time.sleep(0.25)
+		i2c.stopRobot()
 		if(sense.center_line_detected() == "PURPLE"):
 			#Intersection
 			print("Hit purple line.")
@@ -65,17 +68,21 @@ def newDir(d, can_be_same):
 
 def scanForBalloon(color):
 	i2c.lowerLance
-	for i in range(7):
+	i2c.turnRobot(-1, 97, 0.5)
+	for i in range(9):
 		i2c.turnRobot(1, 97, 0.5)
 		i2c.stopRobot()
-		time.sleep(1)
-		if(pix.balloonSeen(color)):
-			pix.huntBalloon(color)
+		#time.sleep(0.25)
+		if(pix.balloonSeen(color) == True):
+			pix.chaseBalloon(color)
 			i2c.raiseLance()
 			break
 	i2c.lowerLance()
+	i2c.driveRobot(-1, 80)
+	time.sleep(2)
 
 
-
+"""
 if __name__ == '__main__':
 	main()
+"""

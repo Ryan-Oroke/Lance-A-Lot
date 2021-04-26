@@ -29,44 +29,51 @@ class Blocks (Structure):
 blocks = BlockArray(100)
 b = BlockArray(100)
 frame = 0
-min_balloon_height = 60
+min_balloon_height = 40
 
 def balloonSeen(s):
+	blocks = BlockArray(100)
 	frame = 0
 	count = pixy.ccc_get_blocks(100, blocks)
 	if count > 0:
-	        print('frame %3d:' % (frame))
-	        frame = frame + 1
-		for index in range (0, count):
-	                print('[BLOCK: SIG=%d X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d]' % (blocks[index].m_signature, blocks[index].m_x, blocks[index].m_y, blocks[index].m_width, blocks[index].m_height))
+		frame += 1
+	        for index in range (count+1):
+			print("frame " + str(frame) + ": [" + str(blocks[index].m_signature) + "," + str(blocks[index].m_height) + "]")
 			if(blocks[index].m_signature == s and blocks[index].m_height > min_balloon_height):
+				print("Returned true")
 				return True
 	else:
 		print("No frames found.")
 	return False
-"""
+
 def chaseBalloon(s):
+	print("Chasing balloon!")
 	timeout = 10
-	i2c.lowerLance()
+	i2c.raiseLance()
 	start_time = time.time()
+	x_center = 150
 	while(time.time() - start_time < timeout):
-		count = pixy.ccc_get_blocks(100, blocks)	
+		count = pixy.ccc_get_blocks(100, blocks)
+		print(count)
 		if(count > 0):
 			for index in range(0, count):
 				if(blocks[index].m_signature == s and blocks[index].m_height > min_balloon_height):
-					if(abs(blocks[index].m_x) < 30):
-						if(blocks[index].m_x < 0):
-							i2c.turnRobot(-1, 80, 0.1)
-						else:
+					print("S:" + str(blocks[index].m_signature) + " X:"+str(blocks[index].m_x))
+					if(abs(blocks[index].m_x-x_center) > 15):
+						print("Turning...")
+						if(blocks[index].m_x-x_center < 0):
 							i2c.turnRobot(1, 80, 0.1)
+						else:
+							i2c.turnRobot(-1, 80, 0.1)
 					else:
 						i2c.driveRobot(1, 70)
 						time.sleep(0.03)
 		else:
 			break
 
-
-
+	i2c.stopRobot()
+	i2c.lowerLance()
+"""
 	#Camera Stuff
 
 	IR_LEFT_PIN = 22
@@ -170,7 +177,6 @@ def huntBalloon(color):
 
 		    #time.sleep()
 		    if(tracking_balloon == False):
-			return 
 		        #print(GPIO.input(IR_PIN))
 		        
 		        #print(left_on, center_on, right_on)

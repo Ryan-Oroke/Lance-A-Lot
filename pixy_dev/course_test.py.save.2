@@ -49,7 +49,7 @@ def main():
 	else:
 		color = red
 		print("BLUE TEAM", color)
-	
+	"""
 	robot.lineBasedOrient()
 
 	#Calls the traverseGraph function to travel between nodes. Also raises and lowers servo when needed with i2c. 
@@ -69,15 +69,14 @@ def main():
 	dir = traverseGraph(dir, 81, 63)
 	dir = robot.changeOrientation(63, S, W)
 	dir = balloonDecision(dir, color, 63, 84)
+	"""
 
 	dir = traverseGraph(dir, 84, 43)
-	#dir = robot.changeOrientation(43, N, E)
-	i2c.turnRobot(-1, 80, 1)
-	dir = E
+	dir = robot.changeOrientation(43, N, E)
 	dir = balloonDecision(dir, color, 43, 87)
 
 	dir = traverseGraph(dir, 87, 13)
-	#dir = robot.changeOrientation(13, S, E)
+	dir = robot.changeOrientation(13, S, E)
 	i2c.driveRobot(1, 80)
 
 	#randomMode()
