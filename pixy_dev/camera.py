@@ -7,8 +7,8 @@ import time
 
 # Set the GPIO
 triggered = False
-yellow_threshold = 1000
-purple_threshold = 1200
+yellow_threshold = 600
+purple_threshold = 600
 
 def get_line_status():
     cap = cv2.VideoCapture(0)

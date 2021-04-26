@@ -5,7 +5,7 @@ import pixy_module as pix
 #from simple_pid import PID
 
 #std_speed = 65
-std_speed = 67
+std_speed = 75
 
 sight_threshold = 45
 
@@ -21,9 +21,9 @@ max_ultrasonic_reading = 50
 
 control = 0
 
-intersection_delay = 2.45
-line_crossing_delay = 0.625
-backup_delay= 0.64
+intersection_delay = 2 #2.45
+line_crossing_delay = 0.5 #0.625
+backup_delay = 0.64
 short_backup_delay = 0.2
 #driving_timeout = 12
 driving_timeout = 9
@@ -32,7 +32,7 @@ blank_intersection_search_delay = 3.4
 blank_intersection_adj_delay = 0.5
 
 turn_bumper_delay = 1.2
-turn90_time = 1.05
+turn90_time = 10
 adj_delay = 0.125
 
 oriented_threshold = 100

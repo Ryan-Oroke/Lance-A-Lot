@@ -3,15 +3,12 @@ import pixy
 from ctypes import *
 from pixy import *
 import I2C_LIB as i2c
-import time
-
-import time
 import os
-import i2c_woot as i2c
 import RPi.GPIO as GPIO
 import time
 import signal
 import sys
+import Sensors as sense
 # Pixy2 Python SWIG get blocks example #
 
 print("Pixy2 Python SWIG Example -- Get Blocks")
@@ -30,12 +27,13 @@ class Blocks (Structure):
     ("m_age", c_uint) ]
 
 blocks = BlockArray(100)
+b = BlockArray(100)
 frame = 0
 min_balloon_height = 60
 
 def balloonSeen(s):
 	frame = 0
-	count = pixy.ccc_get_blocks (100, blocks)
+	count = pixy.ccc_get_blocks(100, blocks)
 	if count > 0:
 	        print('frame %3d:' % (frame))
 	        frame = frame + 1
@@ -46,10 +44,10 @@ def balloonSeen(s):
 	else:
 		print("No frames found.")
 	return False
-
+"""
 def chaseBalloon(s):
 	timeout = 10
-	i2c.sendMessage("SV000")
+	i2c.lowerLance()
 	start_time = time.time()
 	while(time.time() - start_time < timeout):
 		count = pixy.ccc_get_blocks(100, blocks)	
@@ -84,27 +82,24 @@ def chaseBalloon(s):
 	blocks = BlockArray(100)
 	b = BlockArray(100)
 	frame = 0
-
+"""
 def checkForBalloon(s, w):
 	print(4)
 	c = pixy.ccc_get_blocks(100, b)
 	print(5)
 	for i in range(c):
         	if(b[i].m_signature == s and b[i].m_width >= w):
+			print("I see a balloooooooon!!!")
             		return True
+	print("This is boring, a balloon isn't even in sight...")
 	return False
 
 def huntBalloon(color):
-	#set the gpio pinouts with BCM numbering
-	GPIO.setmode(GPIO.BCM)
-
-	#setup the button pins
-	GPIO.setup(IR_LEFT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(IR_CENTER_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(IR_RIGHT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-	signal.signal(signal.SIGINT, signal_handler)
-
+	std_spd = 68
+	thr = 10
+	x_center = 150
+	last_bump_right = False
+	frame = 0
 	time.sleep(1)
 	big_delay = 0.5
 	small_delay = 0.05
@@ -116,17 +111,18 @@ def huntBalloon(color):
 	i2c.driveMotor("A", 0)
 	i2c.driveMotor("B", 0)
 
-	i2c.SendI2CMessage("SV140")
+	i2c.lowerLance()
 
 	try:
 		while(True):
 
 		    #Check for lines
-		    left_on = GPIO.input(IR_LEFT_PIN)
-		    center_on = GPIO.input(IR_CENTER_PIN)
-		    right_on = GPIO.input(IR_RIGHT_PIN)
+            	    ir = sense.IR_read()
+		    left_on = ir[0]
+		    center_on = ir[1]
+		    right_on = ir[2]
 
-		    #False by deaault
+		    #False by default
 		    tracking_balloon = False
 
 		    #Capture Image and convert to HSV
@@ -136,161 +132,135 @@ def huntBalloon(color):
 		        frame = frame + 1
 		        for index in range(count):
 		            #print('BLOCK: SIG=%d, X=%d, Y=%d, W=%d, H=%d' % (blocks[index].m_signature, blocks[index].m_x, blocks[index].m_y, blocks[index].m_width, blocks[index].m_height) )
-		            if(blocks[index].m_width > 50 and blocks[index].m_signature == 2):
+		            if(blocks[index].m_width > 50 and blocks[index].m_signature == color):
 		                #Balloon Seen
-		        	i2c.SendI2CMessage("SV000")
+		        	i2c.raiseLance()
 		                print("X Position:", blocks[index].m_x)
-		                if(left_on and center_on and right_on):
+		                if(left_on and sense.center_line_detected() == "NONE"  and right_on):
 
 		                    tracking_balloon = True;
 
 		                    if(blocks[index].m_x - x_center > thr):
 		                        #Turn Right
-		                        i2c.driveMotor("A", -70)
-		                        i2c.driveMotor("B", 70)
-		                        time.sleep(0.15)
+		                        i2c.turnRobot(-1, std_spd, 0.15)
+		                        #time.sleep(0.15)
 
 		                        #driveMotor("A", 50)
 		                        #driveMotor("B", 50);
 		                        #time.sleep(small_delay)
 
-		                        i2c.driveMotor("A", 0)
-		                        i2c.driveMotor("B", 0)
+		                        #i2c.stopRobot()
 		                        #time.sleep(small_delay)
 
 		                    elif(blocks[index].m_x - x_center < -1*thr):
-		                        i2c.driveMotor("A", 70)
-		                        i2c.driveMotor("B", -70)
-		                        time.sleep(0.15)
+		                        i2c.turnRobot(1, std_spd, 0.15)
+		                        #time.sleep(0.15)
 
 		                        #driveMotor("A", 50)
 		                        #driveMotor("B", 50);
 		                        #time.sleep(small_delay)
 
-		                        i2c.driveMotor("A", 0)
-		                        i2c.driveMotor("B", 0)
+		                        #i2c.stopRobot()
 		                        #time.sleep(small_delay)
+
 		                    else:
 		                        #Drive Straight at It!
-		                        i2c.driveMotor("A", 70)
-		                        i2c.driveMotor("B", 70)
+		                        i2c.driveRobot(1, std_spd)
 		                        time.sleep(0.15)
 
 		    #time.sleep()
 		    if(tracking_balloon == False):
-
+			return 
 		        #print(GPIO.input(IR_PIN))
 		        
 		        #print(left_on, center_on, right_on)
-		        if(center_on == False):
+		        if(sense.center_line_detected() == "NONE"):
 		            print("Hit Left")
 		            
 		    	    start_time = time.time()
 
-		            i2c.driveMotor("A", 0)
-		            i2c.driveMotor("B", 0)
+		            i2c.stopRobot()
 		            time.sleep(small_delay)
 		            
-		            i2c.driveMotor("A", -50)
-		            i2c.driveMotor("B", -50)
+		            i2c.driveRobot(-1, std_spd)
 		            time.sleep(big_delay)
 		            time.sleep(big_delay)
 
-		            i2c.driveMotor("A", 0)
-		            i2c.driveMotor("B", 0)
+		            i2c.stopRobot
 		            time.sleep(small_delay)
 		            
 		            if(last_bump_right == False):
-		                i2c.driveMotor("A", 50)
-		                i2c.driveMotor("B", -50)
+		                i2c.driveRobot(1, std_spd)
 		                time.sleep(big_delay)
 		            else:
-		                i2c.driveMotor("A", -50)
-		                i2c.driveMotor("B", 50)
-		                time.sleep(big_delay)
+		                i2c.turnRobot(-1, std_spd, big_delay)
 
-		    #i2c.driveMotor("A", 50)
-		    #i2c.driveMotor("B", 50)
-		    #time.sleep(big_delay)
+		        	#i2c.driveMotor("A", 50)
+		        	#i2c.driveMotor("B", 50)
+		        	#time.sleep(big_delay)
 
-		    i2c.driveMotor("A", 0)
-		    i2c.driveMotor("B", 0)
-		                
-		                
-			    elif(left_on == False):
+		    	    i2c. stopRobot()
+
+		    	elif(left_on == False):
 				start_time = time.time()
 
 				print("Hit Left")
 				last_bump_right = True;
 
-				i2c.driveMotor("A", 0)
-				i2c.driveMotor("B", 0)
+				i2c.stopRobot()
 				time.sleep(small_delay)
 
-				i2c.driveMotor("A", -50)
-				i2c.driveMotor("B", 50)
-				time.sleep(big_delay)
+				i2c.turnRobot(-1, std_spd, big_delay)
 
-				i2c.driveMotor("A", 0)
-				i2c.driveMotor("B", 0)
-					time.sleep(small_delay)
+				i2c.stopRobot()
+				time.sleep(small_delay)
 			
-			    elif(right_on == False):
-
+			elif(right_on == False):
 				start_time = time.time()
 
 				print("Hit Left")
 				last_bump_right = False
 
-				i2c.driveMotor("A", 0)
-				i2c.driveMotor("B", 0)
+				i2c.stopRobot()
 				time.sleep(small_delay)
 
-				i2c.driveMotor("A", 50)
-				i2c.driveMotor("B", -50)
-				time.sleep(big_delay)
+				i2c.turnRobot(1, std_spd, big_delay)
 
-				i2c.driveMotor("A", 0)
-				i2c.driveMotor("B", 0)
+				i2c.stopRobot()
 				time.sleep(small_delay)
 
-		i2c.driveMotor("A", 70)
-		i2c.driveMotor("B", 70)
-		time.sleep(0.01)
+			i2c.driveMotor("A", 70)
+			i2c.driveMotor("B", 70)
+			time.sleep(0.01)
 
-		if(time.time() - start_time > swivel_time_gap and tracking_balloon == False):
+			if(time.time() - start_time > swivel_time_gap and tracking_balloon == False):
+				    #print(1)
+				    i2c.driveMotor("A", swivel_speed)
+				    i2c.driveMotor("B", -1*swivel_speed)
+				    time.sleep(swivel_delay)
+				    i2c.stopRobot()
+				    #time.sleep(0.5)
+				    #print(2)
+
+			    #Check to see if a pixy object is not visible
+		    	if(checkForBalloon(1, 100) == False):
+	            	    print(3)
+		            #Turn the other way
+		            i2c.turnRobot(-1, swivel_speed, swivel_delay*2)
+		            i2c.stopRobot()
 			    #print(1)
-			    i2c.driveMotor("A", swivel_speed)
-			    i2c.driveMotor("B", -1*swivel_speed)
-			    time.sleep(swivel_delay)
-			    i2c.stopMotors()
-			    #time.sleep(0.5)
-			    #print(2)
+		            #time.sleep(0.9)
 
-		    #Check to see if a pixy object is not visible
-		if(checkForBalloon(1, 100) == False):
-		        print(3)
-		        #Turn the other way
-		        i2c.driveMotor("A", -1*swivel_speed)
-		        i2c.driveMotor("B", swivel_speed)
-		        time.sleep(swivel_delay*2)
-		        i2c.stopMotors()
-		        #time.sleep(0.5)
-		        
-		        #Check again for the balloon
-		        if(checkForBalloon(1, 100) == False):
-		                i2c.driveMotor("A", swivel_speed)
-		                i2c.driveMotor("B", -1*swivel_speed)
-		                time.sleep(swivel_delay)
+                #Check again for the balloon
+                if(checkForBalloon(1, 100) == False):
+		    print(2)
+                    i2c.driveMotor("A", swivel_speed)
+                    i2c.driveMotor("B", -1*swivel_speed)
+                    time.sleep(swivel_delay)
 		    start_time = time.time()
 
-
 	except:
-		print("Reached Error: ", sys.exc_info()[0])
+		print("Reached Error: ", sys.exc_info()[1:-1])
 		i2c.driveMotor("A", 0)
 		i2c.driveMotor("B", 0)
 		GPIO.cleanup()
-
-
-
-

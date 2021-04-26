@@ -19,7 +19,7 @@ def signal_handler(sig, frame_sig):
 
 signal.signal(signal.SIGINT, signal_handler)
 dir = 1
-color = 2
+color = 1
 
 def main():
 	dir = 1

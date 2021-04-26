@@ -15,8 +15,8 @@ bus = smbus.SMBus(1)
 i2c_address = 0x36
 i2c_cmd = 0x01
 
-adj_A = 1.08
-delay90 = 1.45
+adj_A = 1.0
+delay90 = 0.75
 
 def convertStringToBytes(src):
     converted = []
@@ -73,9 +73,9 @@ def turnRobot(dir, speed, delay):
 
 def turn90(i):
     if(i == 1):
-        turnRobot(1, 70, delay90)
+        turnRobot(1, 110, delay90)
     elif(i == -1):
-        turnRobot(-1, 70, delay90)
+        turnRobot(-1, 110, delay90)
     else:
         print("turn90 input error!")
 	exit(0)
@@ -86,6 +86,8 @@ def driveRobot(dir, speed):
 
 def raiseLance():
     sendMessage("SV020")
+    time.sleep(0.5)
 
 def lowerLance():
     sendMessage("SV170")
+    time.sleep(0.5)

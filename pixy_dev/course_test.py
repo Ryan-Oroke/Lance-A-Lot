@@ -9,6 +9,7 @@ import signal
 import I2C_LIB as i2c
 import time
 import pixy_module as pix
+import team_check as team
 
 #Signal handler function. This will catch the signal for CTRL+C and stop the robot/exit execution. 
 def signal_handler(sig, frame_sig):
@@ -34,12 +35,21 @@ S = 3
 W = 4
 
 def main():
+	color = team.which_team()
+	if(color == 'Red'):
+		color = blue
+		print("RED TEAM", color)
+	else:
+		color = red
+		print("BLUE TEAM", color)
+
 	robot.lineBasedOrient()
 
 	#Calls the traverseGraph function to travel between nodes. Also raises and lowers servo when needed with i2c. 
 	i2c.lowerLance()
 	time.sleep(1)
 	dir = start_dir
+	
 	#dir = traverseGraph(dir, , 43)
 	#exit(0)
 	dir = traverseGraph(dir, 1, 42)
@@ -51,7 +61,11 @@ def main():
 	dir = robot.changeOrientation(41, W, S)
 	dir = balloonDecision(dir, color, 41, 81)
 
-	dir = traverseGraph(dir, 81, 84)
+	dir = traverseGraph(dir, 81, 63)
+	
+	dir = robot.changeOrientation(63, S, W)
+	dir = balloonDecision(dir, color, 63, 84)
+
 	#dir = traverseGraph(dir, 12, 63)
 	#i2c.raiseLance()
 	#dir = traverseGraph(dir, 63, 84)
@@ -192,12 +206,17 @@ def traverseGraph(bearing, s, t):
 def balloonDecision(dir, c, n1, n2):
 	i2c.stopRobot()
 	time.sleep(1)
-	if(pix.balloonSeen(c)):
+	if(pix.checkForBalloon(c, 80) == True):
 		print("!!!KILL THAT BALLOON!!!")
 		i2c.raiseLance()
 		dir = traverseGraph(dir, n1, n2)
-		dir = traverseGraph(dir, n2, n1)
+		i2c.driveRobot(-1, 80)
+		time.sleep(0.75)
 		i2c.lowerLance()
+		i2c.driveRobot(1, 80)
+		time.sleep(0.75)
+		dir = traverseGraph(dir, n2, n1)
+
 	else:
 		print("Nah...not feeling it...")
 
