@@ -12,6 +12,8 @@ The following files are the most relevant to our final project's software:
  - pixy_module.py
  - camera.py
 
+*The following has been copied from our final project report.*
+
 Software Design
 ===============
 
