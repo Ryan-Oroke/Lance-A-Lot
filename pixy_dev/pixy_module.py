@@ -32,11 +32,16 @@ frame = 0
 min_balloon_height = 40
 
 def balloonSeen(s):
+	#FUNCTION USED TO VERIFY THAT A BALLOON EXISTS (THIS IS WHY WE POPPED OUR OWN BALLOONS)
 	blocks = BlockArray(100)
 	frame = 0
+	
+	#Get data from pixy
 	count = pixy.ccc_get_blocks(100, blocks)
 	if count > 0:
 		frame += 1
+		
+		#For each signature the pixy sees, check to see if it matches with any of the parameters we want (size). If so, return true.
 	        for index in range (count+1):
 			print("frame " + str(frame) + ": [" + str(blocks[index].m_signature) + "," + str(blocks[index].m_height) + "]")
 			if(blocks[index].m_signature == s and blocks[index].m_height > min_balloon_height):
@@ -47,14 +52,20 @@ def balloonSeen(s):
 	return False
 
 def chaseBalloon(s):
+	#PRIMARY FUNCTION FOR FOLLOWING BALLOONS ONCE IN RANDOM MODE
+	#This function is only called after a balloon is seen
+	
 	print("Chasing balloon!")
 	timeout = 10
 	i2c.raiseLance()
 	start_time = time.time()
 	x_center = 150
+	
 	while(time.time() - start_time < timeout):
 		std_speed = 65
 		adj_delay = 0.75
+		
+		#Check the IR sensors so the the robot will not cross a line while chasing a balloon
 		ir = sense.IR_read()
 		if(ir[0] == False):
 			#adjustFromBumper(0)
@@ -66,12 +77,18 @@ def chaseBalloon(s):
 			i2c.driveRobot(1, std_speed)
 		            #print("Ultrasonics cannot see.")
 		
+		#Get info from the pixy regarding signature data
 		count = pixy.ccc_get_blocks(100, blocks)
 		print(count)
+		
+		#IF SEES ANYTHING
 		if(count > 0):
 			for index in range(0, count):
+				#IF THE BOX IS WHAT WE WANT
 				if(blocks[index].m_signature == s and blocks[index].m_height > min_balloon_height):
 					print("S:" + str(blocks[index].m_signature) + " X:"+str(blocks[index].m_x))
+					
+					#Adjust the prientation of the robot relative to the locatino of the balloon (yaw)
 					if(abs(blocks[index].m_x-x_center) > 15):
 						print("Turning...")
 						if(blocks[index].m_x-x_center < 0):
@@ -79,6 +96,7 @@ def chaseBalloon(s):
 						else:
 							i2c.turnRobot(-1, 80, 0.1)
 					else:
+						#If the balloon is centered then drive forward
 						i2c.driveRobot(1, 70)
 						time.sleep(0.03)
 		else:
@@ -104,7 +122,7 @@ def chaseBalloon(s):
 	frame = 0
 """
 def checkForBalloon(s, w):
-	print(4)
+	#Look for a balloon of s signature and a minimum of w width
 	c = pixy.ccc_get_blocks(100, b)
 	print(5)
 	for i in range(c):
@@ -114,6 +132,7 @@ def checkForBalloon(s, w):
 	print("This is boring, a balloon isn't even in sight...")
 	return False
 
+#---OLD/UNUSED---
 def huntBalloon(color):
 	std_spd = 68
 	thr = 10
