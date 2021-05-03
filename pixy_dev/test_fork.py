@@ -18,29 +18,35 @@ pid = 9999
 off_state = 1
 on_state = 0
 while(True and pid > 0):
-    #PARENT ONLY
+    #RUN BY THE PARENT ONLY
 
-    #NOT RUNNING 
+    #IF NOT RUNNING 
     if(running == False and GPIO.input(start_stop_pin) == on_state):
         time.sleep(0.2)
+	#Check for debouncing
         if(GPIO.input(start_stop_pin) == 0):
             time.sleep(0.5)
             running = True
+		
+	    #Start the new subprocess child! (Start traversal)
             print("Process Starting")
-            #pid = os.fork() #Start the process!
 	    devnull = open('/dev/null', 'w')
 	    p = subprocess.Popen(["python", "course_test.py"])
-		#"course_test.py"])
-	    pid = p.pid
+
+	    #Store the pid for later, this will allow for killing the traversal mid-drive	
+	    pid = p.pid 
 	    print("Child PID: " + str(pid))
         else:
             print("False positive recieved.")
 
-    #RUNNING 
+    #IF ALREADY RUNNING 
     elif(running == True and GPIO.input(start_stop_pin) == off_state):
         time.sleep(0.2)
+	
+	#Check for debounce
         if(GPIO.input(start_stop_pin) == off_state):
-            #for i in range(25):
+		
+	    #Kill and reap the child
 	    print("Killing child process: " + str(pid))
 	    while p.poll() is None:
 	    	os.kill(pid, 9)
@@ -49,11 +55,12 @@ while(True and pid > 0):
         else:
             print("False negative received.")
 
+    #Wait for the switch to flip and for the program to fork
     elif(running == False and GPIO.input(start_stop_pin) == off_state):
 	#print("Waiting for input to start run.")
 	time.sleep(1)
 
-
+#The child's code. THIS IS OUTDATED AND WAS USED FOR THE FORK() METHOD. 
 if(pid == 0):
     pass
     #os.system("python turn_test.py")
