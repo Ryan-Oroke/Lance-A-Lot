@@ -37,66 +37,43 @@ adj_delay = 0.125
 
 oriented_threshold = 100
 
-def adjustNodeEntrance():
-	turn_delay = 0.9
-	forward_delay = 0.5
-	i2c.stopRobot()
-	i2c.turnRobot(1, std_speed, turn_delay)
-	if(sense.center_line_detected() != "PURPLE"):
-		start_time = time.time()
-		while(sense.center_line_detected() == "NONE" and time.time() - start_time < forward_delay):
-			i2c.driveRobot(1, std_speed)
-		unwind_time = time.time() - start_time
-		i2c.driveRobot(-1, std_speed)
-		#print("Unwind time.")
-		time.sleep(unwind_time)
-		i2c.turnRobot(-1, std_speed, turn_delay*1.3)
-
-	else:
-		i2c.turnRobot(-1, std_speed, turn_delay)
-
-	i2c.driveRobot(1, std_speed)
-	time.sleep(0.75)
-	i2c.stopRobot()
-
-def initialOrient():
-    i2c.lowerLance()
-    dist = sense.Left_dis()
-    print(dist)
-    while(True):
-	print(dist)
-        i2c.turnRobot(1, std_speed, 0.4)
-        i2c.stopRobot()
-        time.sleep(0.25)
-	dist = sense.Left_dis()
-	if(dist > oriented_threshold and dist < 115):
-		print("Oriented: " + str(dist))
-		break
-
-    i2c.turnRobot(1, std_speed, 2)
-
 def lineBasedOrient():
+	#PRIMARY ORIENTATION ALGORITHM FOR ROBOT START
+	#Uses only the IR sensors and is more reliable than the ultrasonics
+	
+	#Timeouts are used to determine when the robot has traversed along the straight path at the start of the course
 	timeout = 6.5
 	single_shot_timeout = 3
 	start_time = time.time()
 	while(True):
+		#Rotate the robot and take a shot forward, if a line appears, backup and try again until the timeouts overflow
 		i2c.turnRobot(1, std_speed, 3*adj_delay)
 		while(sense.center_line_detected() == "NONE"):
 			single_shot_start_time = time.time()
 			i2c.driveRobot(1, std_speed)
 			ir = sense.IR_read()
+			
+			#Check the left/right side IR sensors for "bumper" hits
 			if(ir[0] == False):
+				#Turn robot away from hit
 				i2c.driveRobot(-1, std_speed)
 				time.sleep(5*adj_delay)
 				i2c.turnRobot(1, std_speed, 3*adj_delay)
+				
+				#Update timeouts so as not to include turning time
 				start_time += 8*adj_delay
 				single_shot_start_time += 8*adj_delay
 			elif(ir[2] == False):
+				#Turn robot away from hit
 				i2c.driveRobot(-1, std_speed)
 				time.sleep(5*adj_delay)
 				i2c.turnRobot(-1, std_speed, 3*adj_delay)
+				
+				#Update timeouts so as not to include turning time
 				start_time += 8*adj_delay
 				single_shot_start_time += 8*adj_delay
+				
+			#make sure the timeout hasn't gone over
 			if(time.time() - single_shot_start_time > single_shot_timeout):
 				i2c.driveRobot(-1, std_speed)
 				time.sleep(3)
@@ -106,6 +83,8 @@ def lineBasedOrient():
 			break
 		else:
 			start_time = time.time()
+			
+	#Halt the robot so that the next segment of code can load without risk of runnign off-course
 	i2c.stopRobot()
 
 
@@ -303,7 +282,46 @@ def changeOrientation(n, current, new):
 
 
 
-#ALL OLD OR UNUSED STUFF
+#ALL OLD OR UNUSED STUFF------------------------------------------------------------------------------------
+#Uncommented because this software is no longer used, and did not advance beyond initial dvelopment/testing
+
+def adjustNodeEntrance():
+	turn_delay = 0.9
+	forward_delay = 0.5
+	i2c.stopRobot()
+	i2c.turnRobot(1, std_speed, turn_delay)
+	if(sense.center_line_detected() != "PURPLE"):
+		start_time = time.time()
+		while(sense.center_line_detected() == "NONE" and time.time() - start_time < forward_delay):
+			i2c.driveRobot(1, std_speed)
+		unwind_time = time.time() - start_time
+		i2c.driveRobot(-1, std_speed)
+		#print("Unwind time.")
+		time.sleep(unwind_time)
+		i2c.turnRobot(-1, std_speed, turn_delay*1.3)
+
+	else:
+		i2c.turnRobot(-1, std_speed, turn_delay)
+
+	i2c.driveRobot(1, std_speed)
+	time.sleep(0.75)
+	i2c.stopRobot()
+
+def initialOrient():
+    i2c.lowerLance()
+    dist = sense.Left_dis()
+    print(dist)
+    while(True):
+	print(dist)
+        i2c.turnRobot(1, std_speed, 0.4)
+        i2c.stopRobot()
+        time.sleep(0.25)
+	dist = sense.Left_dis()
+	if(dist > oriented_threshold and dist < 115):
+		print("Oriented: " + str(dist))
+		break
+
+    i2c.turnRobot(1, std_speed, 2)
 
 def crossIntersection(old_dir, new_dir):
 	#NOT USED
