@@ -5,6 +5,7 @@ For all of the final code used during runoff, visit the 'pixy_dev' folder.
 The following files are the most relevant to our final project's software:
  - test_fork.py
  - course_test.py
+ - random_traversal.py
  - robot.py
  - Sensors.py
  - I2C_LIB.py
